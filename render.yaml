@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: shop-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run generate:pg
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # Neon-ის connection string ხელით შეიყვანე
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ACCESS_TOKEN_TTL
+        value: 30m
+      - key: RESET_TOKEN_TTL
+        value: 10m
+      - key: DEV_EXPOSE_RESET_CODE
+        value: "true"
+      - key: ARTIFICIAL_LATENCY_MS
+        value: "0"

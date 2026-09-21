@@ -1,0 +1,299 @@
+openapi: 3.0.3
+info:
+  title: Cyber Storefront API — Authentication
+  version: "1.0.0"
+  description: |
+    ავტორიზაციის API პრაქტიკული პროექტისთვის.
+
+    ## როგორ დააკავშირო
+
+    1. `baseURL` = `http://localhost:4000/api` (ლოკალურად) ან `<deployed URL>/api`
+    2. რეგისტრაცია ან შესვლა აბრუნებს `accessToken`-ს
+    3. ტოკენს ატარებ ჰედერში: `Authorization: Bearer <accessToken>`
+    4. ტოკენის ვადა — **30 წუთი**. ვადის გასვლისას მიიღებ `401` კოდით `TOKEN_EXPIRED`
+
+    ## შეცდომების ერთიანი ფორმატი
+
+    ყველა შეცდომა ერთნაირად გამოიყურება:
+    ```json
+    { "message": "Human readable message", "code": "MACHINE_CODE" }
+    ```
+    ვალიდაციის შეცდომას (`422`) დამატებით აქვს `errors` — ველზე მისაბმელი:
+    ```json
+    {
+      "message": "Validation failed",
+      "code": "VALIDATION_ERROR",
+      "errors": { "email": "Enter a valid email address" }
+    }
+    ```
+    ფორმაზე `errors`-ის გამოყენება: გაიარე გასაღებებზე და თითოეული შეცდომა
+    დააყენე შესაბამის ველზე.
+
+    ## პაროლის აღდგენის ფლოუ
+
+    ```
+    1. POST /auth/forgot-password    { email }                → ყოველთვის 200
+    2. POST /auth/verify-reset-code  { email, code }          → { resetToken }
+    3. POST /auth/reset-password     { resetToken, password } → 200
+    ```
+    ნაბიჯი 1 **ყოველთვის** აბრუნებს 200-ს, მიუხედავად იმისა, არსებობს თუ არა
+    ანგარიში — თორემ ფორმა ანგარიშების ჩამოთვლის ინსტრუმენტად იქცევა.
+
+    კოდი 6-ციფრიანია და ვადა აქვს **15 წუთი**. ელფოსტა არ იგზავნება:
+    კოდი იბეჭდება სერვერის კონსოლში და — სასწავლო რეჟიმში — ბრუნდება
+    პასუხის `devCode` ველში.
+
+servers:
+  - url: http://localhost:4000/api
+    description: ლოკალური
+
+tags:
+  - name: Auth
+    description: რეგისტრაცია, შესვლა, პაროლის აღდგენა
+
+paths:
+  /health:
+    get:
+      tags: [Auth]
+      summary: სერვისის სტატუსი
+      responses:
+        "200":
+          description: OK
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: რეგისტრაცია
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, minLength: 2, example: "Nino Beridze" }
+                email: { type: string, format: email, example: "nino@example.com" }
+                password:
+                  type: string
+                  minLength: 8
+                  description: მინ. 8 სიმბოლო, მინიმუმ 1 ასო და 1 ციფრი
+                  example: "Password1"
+      responses:
+        "201":
+          description: ანგარიში შეიქმნა
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "409":
+          description: ელფოსტა უკვე დაკავებულია (`EMAIL_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationError" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: შესვლა
+      description: |
+        ⚠️ შესვლაზე პაროლის სირთულე **არ მოწმდება** — მხოლოდ სავალდებულოობა.
+        მომხმარებლის არსებული პაროლი შეიძლება ძველი პოლიტიკით იყოს შექმნილი.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: "nino@example.com" }
+                password: { type: string, example: "Password1" }
+      responses:
+        "200":
+          description: შესვლა წარმატებულია
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401":
+          description: არასწორი ელფოსტა ან პაროლი (`INVALID_CREDENTIALS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: მიმდინარე მომხმარებელი
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+        "401":
+          description: ტოკენი არ არის, არასწორია ან ვადაგასულია (`TOKEN_EXPIRED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: გასვლა
+      description: ტოკენი stateless-ია — კლიენტმა უბრალოდ უნდა წაშალოს ის ლოკალურად.
+      responses:
+        "204": { description: OK }
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: "აღდგენა — ნაბიჯი 1: კოდის მოთხოვნა"
+      description: |
+        **ყოველთვის აბრუნებს 200-ს**, არსებობს ანგარიში თუ არა.
+        კოდი 6-ციფრიანია, ვადა 15 წუთი.
+        სასწავლო რეჟიმში (`DEV_EXPOSE_RESET_CODE=true`) კოდი ბრუნდება `devCode`-ში.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email, example: "nino@example.com" }
+      responses:
+        "200":
+          description: ნეიტრალური პასუხი
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "If an account exists for this email, we have sent a 6-digit code." }
+                  expiresInMinutes: { type: integer, example: 15 }
+                  devCode: { type: string, example: "483920", description: "მხოლოდ სასწავლო რეჟიმში" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+  /auth/verify-reset-code:
+    post:
+      tags: [Auth]
+      summary: "აღდგენა — ნაბიჯი 2: კოდის შემოწმება"
+      description: სწორ კოდზე აბრუნებს `resetToken`-ს (ვადა 10 წუთი). 5 მცდელობის შემდეგ კოდი იბლოკება.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email: { type: string, format: email, example: "nino@example.com" }
+                code: { type: string, pattern: "^\\d{6}$", example: "483920" }
+      responses:
+        "200":
+          description: კოდი სწორია
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resetToken: { type: string }
+        "400":
+          description: კოდი არასწორია ან ვადაგასულია (`INVALID_RESET_CODE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationError" }
+        "429":
+          description: ძალიან ბევრი მცდელობა (`TOO_MANY_ATTEMPTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: "აღდგენა — ნაბიჯი 3: ახალი პაროლი"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resetToken, password]
+              properties:
+                resetToken: { type: string }
+                password: { type: string, minLength: 8, example: "NewPassword1" }
+      responses:
+        "200":
+          description: პაროლი შეიცვალა
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        "400":
+          description: ტოკენი არასწორია, ვადაგასულია ან უკვე გამოყენებულია
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Validation:
+      description: ვალიდაციის შეცდომა (`VALIDATION_ERROR`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ValidationError" }
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string, example: "clx8f2k9a0000..." }
+        name: { type: string, example: "Nino Beridze" }
+        email: { type: string, example: "nino@example.com" }
+        createdAt: { type: string, format: date-time }
+
+    AuthResponse:
+      type: object
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        accessToken:
+          type: string
+          description: "ატარე ჰედერში: Authorization: Bearer <accessToken>"
+
+    Error:
+      type: object
+      properties:
+        message: { type: string, example: "Invalid email or password" }
+        code: { type: string, example: "INVALID_CREDENTIALS" }
+
+    ValidationError:
+      type: object
+      properties:
+        message: { type: string, example: "Validation failed" }
+        code: { type: string, example: "VALIDATION_ERROR" }
+        errors:
+          type: object
+          additionalProperties: { type: string }
+          example: { email: "Enter a valid email address", password: "Password must be at least 8 characters" }
