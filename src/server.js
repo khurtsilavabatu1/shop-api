@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
 import authRouter from './routes/auth.js'
 import { latency } from './middleware.js'
+import { mailMode } from './lib/mailer.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -38,4 +39,5 @@ app.use((err, _req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`Cyber API  →  http://localhost:${PORT}/api`)
   console.log(`Swagger UI →  http://localhost:${PORT}/docs`)
+  console.log(`ელფოსტა    →  ${mailMode}`)
 })
