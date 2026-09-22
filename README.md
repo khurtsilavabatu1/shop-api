@@ -3,6 +3,13 @@
 ავტორიზაციის ბექენდი პრაქტიკული პროექტისთვის.
 Express + Prisma + SQLite. ბაზა ფაილშია — არავითარი გარე სერვისი არ სჭირდება.
 
+> 📖 **როგორ მუშაობს ეს API** — არქიტექტურა, JWT, პაროლის ჰეშირება, აღდგენის
+> ფლოუ, დეპლოის პროცესი: [ARCHITECTURE.md](./ARCHITECTURE.md)
+>
+> 🔗 **ცოცხალი API:** https://shop-api-kbe6.onrender.com/api
+> · [Swagger](https://shop-api-kbe6.onrender.com/docs)
+> · [OpenAPI](https://shop-api-kbe6.onrender.com/openapi.yaml)
+
 ## გაშვება
 
 ```bash

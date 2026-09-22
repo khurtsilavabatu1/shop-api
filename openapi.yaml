@@ -3,45 +3,171 @@ info:
   title: Cyber Storefront API — Authentication
   version: "1.0.0"
   description: |
-    ავტორიზაციის API პრაქტიკული პროექტისთვის.
+    **Cyber** ონლაინ მაღაზიის ავტორიზაციის API.
 
-    ## როგორ დააკავშირო
+    სრული ტექნიკური აღწერა (როგორ მუშაობს JWT, პაროლის ჰეშირება, აღდგენის
+    ფლოუ, დეპლოი): [ARCHITECTURE.md](https://github.com/khurtsilavabatu1/shop-api/blob/main/ARCHITECTURE.md)
 
-    1. `baseURL` = `http://localhost:4000/api` (ლოკალურად) ან `<deployed URL>/api`
-    2. რეგისტრაცია ან შესვლა აბრუნებს `accessToken`-ს
-    3. ტოკენს ატარებ ჰედერში: `Authorization: Bearer <accessToken>`
-    4. ტოკენის ვადა — **30 წუთი**. ვადის გასვლისას მიიღებ `401` კოდით `TOKEN_EXPIRED`
+    ---
 
-    ## შეცდომების ერთიანი ფორმატი
+    ## 1. როგორ დააკავშირო
+
+    ```
+    baseURL = https://shop-api-kbe6.onrender.com/api
+    ```
+
+    `.env` ფაილში:
+    ```
+    VITE_API_URL=https://shop-api-kbe6.onrender.com/api
+    ```
+
+    მოთხოვნის მაგალითი:
+    ```js
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const data = await res.json()
+
+    if (!res.ok) throw data   // { message, code, errors? }
+    ```
+
+    > ⚠️ `fetch` **არ აგდებს შეცდომას** 4xx/5xx-ზე. ყოველთვის შეამოწმე `res.ok`.
+
+    ---
+
+    ## 2. ავტორიზაცია
+
+    `register` და `login` აბრუნებენ `accessToken`-ს. ატარებ ჰედერში:
+
+    ```
+    Authorization: Bearer <accessToken>
+    ```
+
+    **ტოკენის ვადა — 30 წუთი.** ვადის გასვლისას მიიღებ:
+    ```json
+    { "message": "Access token expired", "code": "TOKEN_EXPIRED" }
+    ```
+    status `401`. ამ შემთხვევაში წაშალე ტოკენი და გადაამისამართე `/login`-ზე.
+
+    სერვერი სესიებს **არ ინახავს** — ტოკენი თვითკმარია. ამიტომ `POST /auth/logout`
+    მხოლოდ `204`-ს აბრუნებს: ტოკენის წაშლა კლიენტის პასუხისმგებლობაა.
+
+    **Swagger-ში ტესტირებისთვის:** გაუშვი `login`, დააკოპირე `accessToken`,
+    დააჭირე ზემოთ ღილაკს **Authorize** და ჩასვი.
+
+    ---
+
+    ## 3. შეცდომების ერთიანი ფორმატი
 
     ყველა შეცდომა ერთნაირად გამოიყურება:
+
     ```json
-    { "message": "Human readable message", "code": "MACHINE_CODE" }
+    { "message": "Invalid email or password", "code": "INVALID_CREDENTIALS" }
     ```
-    ვალიდაციის შეცდომას (`422`) დამატებით აქვს `errors` — ველზე მისაბმელი:
+
+    ვალიდაციის შეცდომას (`422`) დამატებით აქვს `errors` — **პირდაპირ ველზე მისაბმელი**:
+
     ```json
     {
       "message": "Validation failed",
       "code": "VALIDATION_ERROR",
-      "errors": { "email": "Enter a valid email address" }
+      "errors": {
+        "email": "Enter a valid email address",
+        "password": "Password must be at least 8 characters"
+      }
     }
     ```
-    ფორმაზე `errors`-ის გამოყენება: გაიარე გასაღებებზე და თითოეული შეცდომა
-    დააყენე შესაბამის ველზე.
 
-    ## პაროლის აღდგენის ფლოუ
+    ფრონტზე გამოყენება (React Hook Form):
+    ```js
+    if (res.status === 422) {
+      Object.entries(data.errors).forEach(([field, message]) => {
+        setError(field, { message })
+      })
+    }
+    ```
+
+    **გადაწყვეტილება მიიღე `code`-ზე, არა `message`-ზე.** ტექსტი შეიძლება შეიცვალოს,
+    კოდი — არა.
+
+    | code | status | როდის |
+    |---|---|---|
+    | `VALIDATION_ERROR` | 422 | ველები არავალიდურია (აქვს `errors`) |
+    | `EMAIL_TAKEN` | 409 | ელფოსტა უკვე რეგისტრირებულია |
+    | `INVALID_CREDENTIALS` | 401 | არასწორი ელფოსტა ან პაროლი |
+    | `UNAUTHORIZED` | 401 | ტოკენი არ არის გადმოცემული |
+    | `TOKEN_EXPIRED` | 401 | ტოკენს ვადა გაუვიდა → logout |
+    | `INVALID_TOKEN` | 401 | ტოკენი დაზიანებული ან გაყალბებულია |
+    | `INVALID_RESET_CODE` | 400 | აღდგენის კოდი არასწორი ან ვადაგასულია |
+    | `TOO_MANY_ATTEMPTS` | 429 | 5+ არასწორი კოდი — მოითხოვე ახალი |
+    | `RESET_TOKEN_USED` | 400 | resetToken უკვე გამოყენებულია |
+
+    ---
+
+    ## 4. პაროლის აღდგენა — სამი ნაბიჯი
 
     ```
-    1. POST /auth/forgot-password    { email }                → ყოველთვის 200
+    1. POST /auth/forgot-password    { email }                → 200 (ყოველთვის)
     2. POST /auth/verify-reset-code  { email, code }          → { resetToken }
     3. POST /auth/reset-password     { resetToken, password } → 200
     ```
-    ნაბიჯი 1 **ყოველთვის** აბრუნებს 200-ს, მიუხედავად იმისა, არსებობს თუ არა
-    ანგარიში — თორემ ფორმა ანგარიშების ჩამოთვლის ინსტრუმენტად იქცევა.
 
-    კოდი 6-ციფრიანია და ვადა აქვს **15 წუთი**. ელფოსტა არ იგზავნება:
-    კოდი იბეჭდება სერვერის კონსოლში და — სასწავლო რეჟიმში — ბრუნდება
-    პასუხის `devCode` ველში.
+    **ნაბიჯი 1 ყოველთვის აბრუნებს 200-ს**, არსებობს ანგარიში თუ არა.
+    წინააღმდეგ შემთხვევაში ფორმა იქცევა ინსტრუმენტად, რომლითაც გაიგებ,
+    ვის აქვს ანგარიში საიტზე (*account enumeration*).
+    იმავე მიზეზით `/auth/login` ამბობს „არასწორი ელფოსტა **ან** პაროლი".
+
+    - კოდი **6-ციფრიანია**, ვადა **15 წუთი**
+    - **5 არასწორი მცდელობის** შემდეგ კოდი იბლოკება → `429`
+    - `resetToken` **ერთჯერადია**, ვადა 10 წუთი
+
+    ### ელფოსტა არ იგზავნება
+
+    ეს სასწავლო API-ა. კოდი:
+    1. იბეჭდება სერვერის ლოგში
+    2. ბრუნდება პასუხის **`devCode`** ველში
+
+    ანუ სრული ფლოუს ტესტირება ელფოსტის სერვისის გარეშე შეგიძლია.
+    რეალურ პროდუქტში `devCode` არ იარსებებდა.
+
+    ---
+
+    ## 5. ⚠️ login ≠ register (განზრახი ასიმეტრია)
+
+    | ენდპოინტი | პაროლის ვალიდაცია |
+    |---|---|
+    | `/auth/register` | მინ. 8 სიმბოლო, 1 ასო, 1 ციფრი |
+    | `/auth/login` | **მხოლოდ სავალდებულო** |
+
+    ეს შეცდომა არ არის. მომხმარებლის არსებული პაროლი შეიძლება ძველი პოლიტიკით
+    იყოს შექმნილი — თუ შესვლაზე სირთულეს შეამოწმებ, **ის საკუთარ ანგარიშში
+    ვეღარ შევა**, მიუხედავად იმისა, რომ პაროლი სწორია.
+
+    იგივე წესი დაიცავი ფრონტზეც.
+
+    ---
+
+    ## 6. ტიპების გენერაცია
+
+    ტიპები ხელით ნუ დაწერ — დააგენერირე ამ სპეციფიკაციიდან:
+
+    ```bash
+    npx openapi-typescript https://shop-api-kbe6.onrender.com/openapi.yaml \
+      -o src/shared/api/schema.d.ts
+    ```
+
+    ასე API-ის ცვლილება **კომპილაციის დროს** გამოჩნდება, არა მომხმარებელთან.
+
+    ---
+
+    ## 7. სხვა შენიშვნები
+
+    - **CORS** ღიაა — ნებისმიერი დომენიდან შეგიძლია მოთხოვნა
+    - სერვისი უფასო ჰოსტინგზეა; პირველი მოთხოვნა იშვიათად შეიძლება იყოს ნელი
+    - ბაზა საერთოა ყველა გუნდისთვის: **ელფოსტა უნიკალურია გლობალურად**.
+      თუ `test@test.com` დაკავებულია, აიღე სხვა — ან დაამუშავე `409 EMAIL_TAKEN`
 
 servers:
   - url: http://localhost:4000/api
