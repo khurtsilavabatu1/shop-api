@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import { validate, requireAuth } from '../middleware.js'
+import { sendResetCode } from '../lib/mailer.js'
 
 const router = Router()
 
@@ -116,7 +117,7 @@ router.post('/forgot-password', validate(forgotSchema), async (req, res, next) =
           expiresAt: new Date(Date.now() + CODE_TTL_MINUTES * 60_000),
         },
       })
-      console.log(`[reset-code] ${email} -> ${code} (valid ${CODE_TTL_MINUTES}m)`)
+      await sendResetCode(email, code, CODE_TTL_MINUTES)
       if (process.env.DEV_EXPOSE_RESET_CODE === 'true') body.devCode = code
     }
 
