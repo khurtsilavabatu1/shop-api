@@ -8,6 +8,8 @@ import authRouter from './routes/auth.js'
 import catalogRouter from './routes/catalog.js'
 import { latency } from './middleware.js'
 import { mailMode } from './lib/mailer.js'
+import { prisma } from './db.js'
+import { ensureCatalog } from '../prisma/seed/index.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -37,6 +39,8 @@ app.use((err, _req, res, _next) => {
   console.error(err)
   res.status(500).json({ message: 'Internal server error', code: 'INTERNAL_ERROR' })
 })
+
+ensureCatalog(prisma).catch((e) => console.error('კატალოგის შევსება ჩავარდა:', e.message))
 
 app.listen(PORT, () => {
   console.log(`Cyber API  →  http://localhost:${PORT}/api`)

@@ -87,8 +87,11 @@ function makeProduct(cat, i) {
   }
 }
 
-async function main() {
-  console.log('კატალოგის გასუფთავება...')
+let counter = 0
+const makeId = (prefix) => `${prefix}${Date.now().toString(36)}${(counter++).toString(36).padStart(4, '0')}`
+
+/** აშენებს მთელ კატალოგს. `prisma` გარედან მოდის, რომ ორივე სცენარში გამოდგეს. */
+export async function seedCatalog(prisma, { log = console.log } = {}) {
   await prisma.productAttribute.deleteMany()
   await prisma.product.deleteMany()
   await prisma.category.deleteMany()
@@ -108,26 +111,35 @@ async function main() {
       },
     })
 
+    const products = []
+    const attributes = []
+
     for (let i = 0; i < PRODUCTS_PER_CATEGORY; i++) {
-      const { attributes, ...data } = makeProduct(cat, i)
-      await prisma.product.create({
-        data: {
-          ...data,
-          categoryId: category.id,
-          attributes: {
-            create: Object.entries(attributes).map(([key, value]) => ({ key, value })),
-          },
-        },
-      })
-      total++
+      const { attributes: attrs, ...data } = makeProduct(cat, i)
+      const id = makeId('p')
+      products.push({ id, ...data, categoryId: category.id })
+      for (const [key, value] of Object.entries(attrs)) {
+        attributes.push({ id: makeId('a'), productId: id, key, value })
+      }
     }
 
-    console.log(`  ${cat.name.padEnd(28)} ${PRODUCTS_PER_CATEGORY} პროდუქტი`)
+    await prisma.product.createMany({ data: products })
+    await prisma.productAttribute.createMany({ data: attributes })
+
+    total += products.length
+    log(`  ${cat.name.padEnd(28)} ${products.length} პროდუქტი`)
   }
 
-  console.log(`\n✓ ${categories.length} კატეგორია, ${total} პროდუქტი, ${total * IMAGES_PER_PRODUCT} სურათი`)
+  return { categories: categories.length, products: total }
 }
 
-main()
-  .catch((e) => { console.error(e); process.exit(1) })
-  .finally(() => prisma.$disconnect())
+/** ავსებს კატალოგს მხოლოდ მაშინ, თუ ის ცარიელია (გაშვებისას ირთვება) */
+export async function ensureCatalog(prisma) {
+  const existing = await prisma.category.count()
+  if (existing > 0) return { skipped: true, categories: existing }
+
+  console.log('კატალოგი ცარიელია — ვავსებ...')
+  const result = await seedCatalog(prisma)
+  console.log(`✓ ${result.categories} კატეგორია, ${result.products} პროდუქტი`)
+  return result
+}
