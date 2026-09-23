@@ -254,6 +254,8 @@ servers:
     description: ლოკალური
 
 tags:
+  - name: Catalog
+    description: კატეგორიები და პროდუქტები — ფილტრაცია, სორტირება, პაგინაცია, ძებნა
   - name: Auth
     description: რეგისტრაცია, შესვლა, პაროლის აღდგენა
 
@@ -265,6 +267,116 @@ paths:
       responses:
         "200":
           description: OK
+
+
+  /categories:
+    get:
+      tags: [Catalog]
+      summary: ყველა კატეგორია
+      description: |
+        აბრუნებს 12 კატეგორიას პროდუქტების რაოდენობითა და **ფილტრების განსაზღვრებებით**.
+
+        თითო კატეგორიის `filters` მასივი აღწერს, რა ფილტრები უნდა დაიხატოს ამ
+        კატეგორიაზე. **ფილტრების პანელი ამ მონაცემებიდან აიგება, არა ჰარდკოდიდან** —
+        ტანსაცმელს „ზომა" და „სეზონი" აქვს, ლეპტოპს „პროცესორი" და „დისკი".
+
+        ```json
+        { "key": "storage", "label": "მეხსიერება", "type": "checkbox",
+          "options": ["64GB", "128GB", "256GB"] }
+        ```
+        `type`: `checkbox` (მრავლობითი) · `radio` (ერთი) · `color` (ფერის ნიმუშები)
+      responses:
+        "200": { description: OK }
+
+  /categories/{slug}:
+    get:
+      tags: [Catalog]
+      summary: ერთი კატეგორია + ფასის დიაპაზონი და ბრენდები
+      description: |
+        დამატებით აბრუნებს `priceRange` (მინ/მაქს ფასი ამ კატეგორიაში) და `brands` —
+        ფილტრების პანელის ასაგებად.
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string }, example: smartphones }
+      responses:
+        "200": { description: OK }
+        "404": { description: კატეგორია არ მოიძებნა }
+
+  /brands:
+    get:
+      tags: [Catalog]
+      summary: ბრენდების სია
+      parameters:
+        - { name: category, in: query, schema: { type: string }, description: "კატეგორიის slug — მხოლოდ ამ კატეგორიის ბრენდები" }
+      responses:
+        "200": { description: OK }
+
+  /products:
+    get:
+      tags: [Catalog]
+      summary: პროდუქტების სია — ფილტრაცია, სორტირება, პაგინაცია, ძებნა
+      description: |
+        ## პასუხის ფორმა
+
+        ```json
+        { "items": [...], "total": 480, "page": 1, "limit": 12,
+          "totalPages": 40, "sort": "newest" }
+        ```
+
+        ## ატრიბუტების ფილტრები
+
+        გარდა ქვემოთ ჩამოთვლილი პარამეტრებისა, **ნებისმიერი ატრიბუტი** შეგიძლია
+        გამოიყენო ფილტრად — გასაღები აიღე კატეგორიის `filters`-იდან:
+
+        ```
+        /products?category=smartphones&storage=256GB,512GB&color=შავი
+        /products?category=clothing&size=M&season=ზამთარი
+        /products?category=books&genre=ფანტასტიკა&language=ქართული
+        ```
+
+        მრავალი მნიშვნელობა — მძიმით გამოყოფილი (`ან` ლოგიკა).
+        სხვადასხვა ფილტრი ერთმანეთს ავსებს (`და` ლოგიკა).
+
+        ## 🔑 რეკომენდაცია
+
+        **ყველა ფილტრი URL-ში ჩაწერე** (`?category=...&sort=...&page=2`).
+        მაშინ ბმული გასაზიარებელია, „უკან" ღილაკი მუშაობს და გვერდის განახლება
+        არაფერს კარგავს.
+      parameters:
+        - { name: category, in: query, schema: { type: string }, description: "კატეგორიის slug. მძიმით — რამდენიმე", example: smartphones }
+        - { name: brand, in: query, schema: { type: string }, description: "ბრენდი. მძიმით — რამდენიმე", example: Apple }
+        - { name: q, in: query, schema: { type: string }, description: "ძებნა სახელში, ბრენდსა და აღწერაში" }
+        - { name: minPrice, in: query, schema: { type: number }, example: 500 }
+        - { name: maxPrice, in: query, schema: { type: number }, example: 3000 }
+        - { name: minRating, in: query, schema: { type: number }, description: "მინიმალური რეიტინგი (1–5)", example: 4 }
+        - { name: inStock, in: query, schema: { type: boolean }, description: "მხოლოდ მარაგში არსებული" }
+        - { name: onSale, in: query, schema: { type: boolean }, description: "მხოლოდ ფასდაკლებული" }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, oldest, price-asc, price-desc, rating-desc, popular, title-asc]
+            default: newest
+        - { name: page, in: query, schema: { type: integer, default: 1, minimum: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 12, minimum: 1, maximum: 60 } }
+      responses:
+        "200": { description: OK }
+
+  /products/{slug}:
+    get:
+      tags: [Catalog]
+      summary: ერთი პროდუქტი + მსგავსი პროდუქტები
+      description: |
+        აბრუნებს სრულ პროდუქტს: **5 სურათი**, `specs` (კატეგორიისთვის შესაბამისი
+        მახასიათებლები), `attributes`, გარანტია, მარაგი, და `related` —
+        8 მსგავსი პროდუქტი იმავე კატეგორიიდან.
+
+        `specs` არის `{ "მახასიათებელი": "მნიშვნელობა" }` — **ნებისმიერი კატეგორიისთვის
+        ერთი და იგივე ფორმა**. ცხრილი ერთხელ იწერება და ყველგან მუშაობს.
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: OK }
+        "404": { description: პროდუქტი არ მოიძებნა }
 
   /auth/register:
     post:

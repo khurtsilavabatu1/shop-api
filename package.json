@@ -10,7 +10,9 @@
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "db:push:pg": "prisma db push --schema=prisma/schema.postgres.prisma",
-    "generate:pg": "prisma generate --schema=prisma/schema.postgres.prisma"
+    "generate:pg": "prisma generate --schema=prisma/schema.postgres.prisma",
+    "seed": "node prisma/seed/index.js",
+    "seed:pg": "node prisma/seed/index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

@@ -28,3 +28,52 @@ model PasswordResetCode {
 
   @@index([userId])
 }
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  nameEn      String
+  description String
+  image       String
+  sortOrder   Int       @default(0)
+  filters     String    // JSON: [{ key, label, type, options[] }]
+  products    Product[]
+}
+
+model Product {
+  id             String             @id @default(cuid())
+  slug           String             @unique
+  title          String
+  description    String
+  brand          String
+  price          Float
+  oldPrice       Float?
+  currency       String             @default("GEL")
+  rating         Float
+  reviewsCount   Int
+  stock          Int
+  warrantyMonths Int
+  images         String             // JSON: string[]
+  specs          String             // JSON: Record<string, string>
+  categoryId     String
+  category       Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  attributes     ProductAttribute[]
+  createdAt      DateTime           @default(now())
+
+  @@index([categoryId])
+  @@index([brand])
+  @@index([price])
+  @@index([rating])
+}
+
+model ProductAttribute {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key       String
+  value     String
+
+  @@index([productId])
+  @@index([key, value])
+}

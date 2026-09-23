@@ -1,0 +1,338 @@
+/**
+ * 12 კატეგორია სხვადასხვა სფეროდან.
+ *
+ * თითო კატეგორიას აქვს:
+ *   brands   — ბრენდები, რომელთაგანაც პროდუქტები აიგება
+ *   models   — მოდელის სახელის ნაწილები
+ *   price    — [მინ, მაქს] ფასის დიაპაზონი ₾
+ *   warranty — შესაძლო გარანტიის ვადები თვეებში
+ *   specs    — ფუნქცია, რომელიც აბრუნებს ამ კატეგორიისთვის შესაბამის მახასიათებლებს
+ *   filters  — გასაფილტრი ატრიბუტები (ფრონტი ამათგან აგებს ფილტრების პანელს)
+ */
+
+const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)]
+const int = (rng, min, max) => min + Math.floor(rng() * (max - min + 1))
+
+export const categories = [
+  {
+    slug: 'smartphones',
+    name: 'სმარტფონები',
+    nameEn: 'Smartphones',
+    description: 'სმარტფონები ყველა ბიუჯეტისთვის — ფლაგმანებიდან ყოველდღიურ მოდელებამდე.',
+    brands: ['Apple', 'Samsung', 'Xiaomi', 'Google', 'OnePlus', 'Nothing', 'Honor', 'Motorola'],
+    models: ['Pro', 'Pro Max', 'Ultra', 'Lite', 'Plus', 'Mini', 'Fusion', 'Edge'],
+    price: [450, 4200],
+    warranty: [12, 24],
+    filters: [
+      { key: 'storage', label: 'მეხსიერება', type: 'checkbox', options: ['64GB', '128GB', '256GB', '512GB', '1TB'] },
+      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'თეთრი', 'ლურჯი', 'მწვანე', 'ვარდისფერი', 'ოქროსფერი'] },
+      { key: 'ram', label: 'ოპერატიული', type: 'checkbox', options: ['4GB', '6GB', '8GB', '12GB', '16GB'] },
+      { key: 'os', label: 'სისტემა', type: 'radio', options: ['iOS', 'Android'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ეკრანი': `${(5.4 + rng() * 1.6).toFixed(1)}" ${pick(rng, ['OLED', 'AMOLED', 'IPS LCD'])}`,
+      'განახლების სიხშირე': pick(rng, ['60Hz', '90Hz', '120Hz', '144Hz']),
+      'პროცესორი': pick(rng, ['Snapdragon 8 Gen 3', 'A17 Pro', 'Dimensity 9300', 'Exynos 2400', 'Tensor G3']),
+      'ოპერატიული მეხსიერება': attrs.ram,
+      'მეხსიერება': attrs.storage,
+      'ძირითადი კამერა': `${pick(rng, ['48', '50', '64', '108', '200'])} MP`,
+      'წინა კამერა': `${pick(rng, ['12', '16', '32'])} MP`,
+      'ბატარეა': `${int(rng, 3200, 5500)} mAh`,
+      'დატენვა': `${pick(rng, ['20W', '33W', '67W', '80W', '120W'])}`,
+      'ოპერაციული სისტემა': attrs.os === 'iOS' ? `iOS ${int(rng, 16, 18)}` : `Android ${int(rng, 13, 15)}`,
+      'დაცვა': pick(rng, ['IP67', 'IP68', 'IP54']),
+      'ფერი': attrs.color,
+    }),
+  },
+
+  {
+    slug: 'laptops',
+    name: 'ლეპტოპები',
+    nameEn: 'Laptops',
+    description: 'ლეპტოპები სწავლის, სამსახურისა და გეიმინგისთვის.',
+    brands: ['Apple', 'Dell', 'HP', 'Lenovo', 'ASUS', 'Acer', 'MSI', 'Huawei'],
+    models: ['Air', 'Pro', 'Book', 'Slim', 'Gaming', 'Ultra', 'Flex', 'Studio'],
+    price: [1200, 9500],
+    warranty: [12, 24, 36],
+    filters: [
+      { key: 'cpu', label: 'პროცესორი', type: 'checkbox', options: ['Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7', 'Apple M3'] },
+      { key: 'ram', label: 'ოპერატიული', type: 'checkbox', options: ['8GB', '16GB', '32GB', '64GB'] },
+      { key: 'storage', label: 'დისკი', type: 'checkbox', options: ['256GB SSD', '512GB SSD', '1TB SSD', '2TB SSD'] },
+      { key: 'screen', label: 'ეკრანი', type: 'checkbox', options: ['13"', '14"', '15.6"', '16"', '17"'] },
+    ],
+    specs: (rng, attrs) => ({
+      'პროცესორი': attrs.cpu,
+      'ოპერატიული მეხსიერება': attrs.ram,
+      'დისკი': attrs.storage,
+      'ეკრანი': `${attrs.screen} ${pick(rng, ['IPS', 'OLED', 'Retina'])} ${pick(rng, ['1920×1080', '2560×1440', '2880×1800', '3840×2160'])}`,
+      'ვიდეობარათი': pick(rng, ['Intel Iris Xe', 'NVIDIA RTX 4050', 'NVIDIA RTX 4060', 'NVIDIA RTX 4070', 'AMD Radeon 780M', 'Apple GPU 10-core']),
+      'კლავიატურა': pick(rng, ['განათებული', 'სტანდარტული', 'განათებული, ქართული']),
+      'პორტები': pick(rng, ['2×USB-C, 2×USB-A, HDMI', '3×USB-C, HDMI, SD', '2×Thunderbolt 4, USB-A']),
+      'ბატარეა': `${int(rng, 45, 99)} Wh`,
+      'წონა': `${(1.1 + rng() * 1.6).toFixed(2)} კგ`,
+      'ოპერაციული სისტემა': pick(rng, ['Windows 11 Home', 'Windows 11 Pro', 'macOS', 'უსისტემო']),
+    }),
+  },
+
+  {
+    slug: 'home-appliances',
+    name: 'საყოფაცხოვრებო ტექნიკა',
+    nameEn: 'Home Appliances',
+    description: 'მაცივრები, სარეცხი მანქანები და სხვა ტექნიკა სახლისთვის.',
+    brands: ['Bosch', 'Samsung', 'LG', 'Beko', 'Electrolux', 'Whirlpool', 'Gorenje', 'Ardo'],
+    models: ['Series 4', 'Series 6', 'EcoLine', 'Comfort', 'Inverter', 'Smart', 'Classic', 'Prime'],
+    price: [350, 6500],
+    warranty: [24, 36, 60],
+    filters: [
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['მაცივარი', 'სარეცხი მანქანა', 'ჭურჭლის სარეცხი', 'ღუმელი', 'მიკროტალღური', 'გამწოვი'] },
+      { key: 'energy', label: 'ენერგოკლასი', type: 'checkbox', options: ['A', 'A+', 'A++', 'A+++'] },
+      { key: 'color', label: 'ფერი', type: 'color', options: ['თეთრი', 'ვერცხლისფერი', 'შავი', 'ინოქსი'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ტიპი': attrs.type,
+      'ენერგოკლასი': attrs.energy,
+      'სიმძლავრე': `${int(rng, 800, 2400)} ვტ`,
+      'მოცულობა': `${int(rng, 40, 450)} ლ`,
+      'ხმაურის დონე': `${int(rng, 38, 62)} დბ`,
+      'ზომები (ს×ს×ს)': `${int(rng, 55, 190)}×${int(rng, 45, 70)}×${int(rng, 50, 75)} სმ`,
+      'წონა': `${int(rng, 25, 95)} კგ`,
+      'მართვა': pick(rng, ['ელექტრონული', 'სენსორული', 'მექანიკური']),
+      'ფერი': attrs.color,
+    }),
+  },
+
+  {
+    slug: 'furniture',
+    name: 'ავეჯი',
+    nameEn: 'Furniture',
+    description: 'ავეჯი მისაღებისთვის, საძინებლისა და ოფისისთვის.',
+    brands: ['IKEA', 'JYSK', 'Woodline', 'Nordic Home', 'Casa', 'Vitra', 'Ergo', 'Loft'],
+    models: ['Oslo', 'Milan', 'Nordic', 'Loft', 'Classic', 'Compact', 'Grand', 'Studio'],
+    price: [120, 4800],
+    warranty: [12, 24, 36],
+    filters: [
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['დივანი', 'სავარძელი', 'მაგიდა', 'სკამი', 'კარადა', 'საწოლი', 'თარო'] },
+      { key: 'material', label: 'მასალა', type: 'checkbox', options: ['მუხა', 'წიფელი', 'MDF', 'ლითონი', 'მინა', 'ტექსტილი', 'ეკო-ტყავი'] },
+      { key: 'color', label: 'ფერი', type: 'color', options: ['ნატურალური', 'თეთრი', 'შავი', 'ნაცრისფერი', 'ყავისფერი', 'ლურჯი'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ტიპი': attrs.type,
+      'მასალა': attrs.material,
+      'ზომები (ს×ს×ს)': `${int(rng, 40, 220)}×${int(rng, 35, 110)}×${int(rng, 40, 210)} სმ`,
+      'წონა': `${int(rng, 4, 85)} კგ`,
+      'მაქს. დატვირთვა': `${int(rng, 80, 300)} კგ`,
+      'აწყობა': pick(rng, ['საჭიროა', 'არ საჭიროებს', 'ნაწილობრივ აწყობილი']),
+      'კარკასი': pick(rng, ['მასიური ხე', 'ლამინირებული MDF', 'ფოლადის კარკასი']),
+      'ფერი': attrs.color,
+    }),
+  },
+
+  {
+    slug: 'sports',
+    name: 'სპორტი და ფიტნესი',
+    nameEn: 'Sports & Fitness',
+    description: 'ინვენტარი ვარჯიშისთვის სახლსა და დარბაზში.',
+    brands: ['Nike', 'Adidas', 'Reebok', 'Puma', 'Under Armour', 'Decathlon', 'Domyos', 'Kettler'],
+    models: ['Pro', 'Elite', 'Basic', 'Performance', 'Flex', 'Core', 'Active', 'Trainer'],
+    price: [25, 3200],
+    warranty: [6, 12, 24],
+    filters: [
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['დუმბელი', 'იოგა-ხალიჩა', 'ველოტრენაჟორი', 'ბურთი', 'ექსპანდერი', 'სავარჯიშო სკამი'] },
+      { key: 'level', label: 'დონე', type: 'radio', options: ['დამწყები', 'საშუალო', 'პროფესიონალი'] },
+      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'ნაცრისფერი', 'ლურჯი', 'წითელი', 'მწვანე'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ტიპი': attrs.type,
+      'დონე': attrs.level,
+      'მასალა': pick(rng, ['რეზინი', 'ფოლადი', 'ნეოპრენი', 'TPE', 'PVC', 'ჩუგუნი']),
+      'წონა': `${(0.3 + rng() * 24).toFixed(1)} კგ`,
+      'ზომები': `${int(rng, 20, 180)}×${int(rng, 15, 65)} სმ`,
+      'მაქს. დატვირთვა': `${int(rng, 80, 150)} კგ`,
+      'ფერი': attrs.color,
+    }),
+  },
+
+  {
+    slug: 'beauty',
+    name: 'სილამაზე და მოვლა',
+    nameEn: 'Beauty & Care',
+    description: 'კოსმეტიკა და მოვლის საშუალებები კანისა და თმისთვის.',
+    brands: ['L\'Oreal', 'Nivea', 'Garnier', 'CeraVe', 'The Ordinary', 'Vichy', 'Bioderma', 'La Roche-Posay'],
+    models: ['Hydra', 'Repair', 'Glow', 'Pure', 'Intense', 'Daily', 'Sensitive', 'Revital'],
+    price: [12, 320],
+    warranty: [0],
+    filters: [
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['კრემი', 'შამპუნი', 'სერუმი', 'ტონიკი', 'მასკა', 'ნიღაბი', 'მზისგან დამცავი'] },
+      { key: 'skinType', label: 'კანის ტიპი', type: 'checkbox', options: ['მშრალი', 'ცხიმიანი', 'კომბინირებული', 'მგრძნობიარე', 'ნორმალური'] },
+      { key: 'volume', label: 'მოცულობა', type: 'checkbox', options: ['30მლ', '50მლ', '100მლ', '200მლ', '400მლ'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ტიპი': attrs.type,
+      'კანის ტიპი': attrs.skinType,
+      'მოცულობა': attrs.volume,
+      'ძირითადი კომპონენტი': pick(rng, ['ჰიალურონის მჟავა', 'ვიტამინი C', 'ნიაცინამიდი', 'რეტინოლი', 'ცერამიდები', 'ალოე ვერა']),
+      'გამოყენება': pick(rng, ['დილით', 'საღამოს', 'დილით და საღამოს', 'კვირაში 2-ჯერ']),
+      'ასაკი': pick(rng, ['18+', '25+', '35+', '45+']),
+      'წარმოება': pick(rng, ['საფრანგეთი', 'გერმანია', 'კანადა', 'კორეა', 'იტალია']),
+      'ვარგისიანობა': `${int(rng, 12, 36)} თვე`,
+    }),
+  },
+
+  {
+    slug: 'books',
+    name: 'წიგნები',
+    nameEn: 'Books',
+    description: 'მხატვრული და პროფესიული ლიტერატურა ქართულ და უცხო ენებზე.',
+    brands: ['პალიტრა L', 'სულაკაური', 'ინტელექტი', 'ბაკურ სულაკაური', 'არტანუჯი', 'დიოგენე', 'Penguin', 'O\'Reilly'],
+    models: ['ტომი I', 'ტომი II', 'შევსებული', 'ახალი გამოცემა', 'ჯიბის ფორმატი', 'ილუსტრირებული'],
+    price: [8, 150],
+    warranty: [0],
+    filters: [
+      { key: 'genre', label: 'ჟანრი', type: 'checkbox', options: ['რომანი', 'დეტექტივი', 'ფანტასტიკა', 'ბიოგრაფია', 'ბიზნესი', 'პროგრამირება', 'საბავშვო', 'ისტორია'] },
+      { key: 'language', label: 'ენა', type: 'radio', options: ['ქართული', 'ინგლისური', 'რუსული'] },
+      { key: 'cover', label: 'ყდა', type: 'radio', options: ['მაგარი', 'რბილი'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ჟანრი': attrs.genre,
+      'ენა': attrs.language,
+      'ყდა': attrs.cover,
+      'გვერდების რაოდენობა': `${int(rng, 96, 980)}`,
+      'გამოცემის წელი': `${int(rng, 2005, 2026)}`,
+      'ფორმატი': pick(rng, ['13×20 სმ', '14×21 სმ', '16×24 სმ', '17×24 სმ']),
+      'ISBN': `978-9941-${int(rng, 10, 99)}-${int(rng, 100, 999)}-${int(rng, 0, 9)}`,
+      'წონა': `${int(rng, 180, 1200)} გ`,
+    }),
+  },
+
+  {
+    slug: 'toys',
+    name: 'სათამაშოები',
+    nameEn: 'Toys & Kids',
+    description: 'განმავითარებელი და გასართობი სათამაშოები ყველა ასაკისთვის.',
+    brands: ['LEGO', 'Hasbro', 'Mattel', 'Fisher-Price', 'Playmobil', 'Ravensburger', 'Chicco', 'Bruder'],
+    models: ['City', 'Classic', 'Junior', 'Adventure', 'Creator', 'Explorer', 'Starter', 'Deluxe'],
+    price: [15, 850],
+    warranty: [0, 6, 12],
+    filters: [
+      { key: 'age', label: 'ასაკი', type: 'checkbox', options: ['0-1 წელი', '1-3 წელი', '3-6 წელი', '6-9 წელი', '9-12 წელი', '12+ წელი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['კონსტრუქტორი', 'სამაგიდო თამაში', 'რბილი სათამაშო', 'პაზლი', 'მანქანა', 'თოჯინა'] },
+      { key: 'gender', label: 'ვისთვის', type: 'radio', options: ['გოგონებისთვის', 'ბიჭებისთვის', 'უნივერსალური'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ასაკი': attrs.age,
+      'ტიპი': attrs.type,
+      'ვისთვის': attrs.gender,
+      'დეტალების რაოდენობა': `${int(rng, 1, 1800)}`,
+      'მასალა': pick(rng, ['პლასტმასი', 'ხე', 'ტექსტილი', 'მუყაო', 'სილიკონი']),
+      'ზომები': `${int(rng, 8, 60)}×${int(rng, 8, 45)}×${int(rng, 5, 30)} სმ`,
+      'ბატარეა': pick(rng, ['არ საჭიროებს', '2×AA (არ შედის)', '3×AAA (შედის)']),
+      'უსაფრთხოება': pick(rng, ['CE სერტიფიკატი', 'EN71 სტანდარტი', 'CE + EN71']),
+    }),
+  },
+
+  {
+    slug: 'clothing',
+    name: 'ტანსაცმელი და ფეხსაცმელი',
+    nameEn: 'Clothing & Shoes',
+    description: 'ყოველდღიური და სპორტული ტანსაცმელი ქალებისა და მამაკაცებისთვის.',
+    brands: ['Zara', 'H&M', 'Nike', 'Adidas', 'Levi\'s', 'Mango', 'Bershka', 'Columbia'],
+    models: ['Slim Fit', 'Regular', 'Oversize', 'Classic', 'Sport', 'Casual', 'Outdoor', 'Essential'],
+    price: [25, 890],
+    warranty: [0, 6],
+    filters: [
+      { key: 'size', label: 'ზომა', type: 'checkbox', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
+      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'თეთრი', 'ლურჯი', 'ნაცრისფერი', 'ბეჟი', 'მწვანე', 'წითელი'] },
+      { key: 'gender', label: 'ვისთვის', type: 'radio', options: ['ქალის', 'მამაკაცის', 'უნისექსი'] },
+      { key: 'season', label: 'სეზონი', type: 'checkbox', options: ['ზაფხული', 'ზამთარი', 'დემისეზონური', 'ყველა სეზონი'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ზომა': attrs.size,
+      'ფერი': attrs.color,
+      'ვისთვის': attrs.gender,
+      'სეზონი': attrs.season,
+      'მასალა': pick(rng, ['100% ბამბა', 'პოლიესტერი', 'ბამბა/ელასტანი', 'ტყავი', 'დენიმი', 'ბამბუკის ბოჭკო']),
+      'რეცხვა': pick(rng, ['30°C მანქანით', '40°C მანქანით', 'მხოლოდ ხელით', 'ქიმწმენდა']),
+      'ჭრილი': pick(rng, ['Slim', 'Regular', 'Oversize', 'Relaxed']),
+      'წარმოება': pick(rng, ['თურქეთი', 'პორტუგალია', 'ვიეტნამი', 'ბანგლადეში', 'ჩინეთი']),
+    }),
+  },
+
+  {
+    slug: 'kitchen',
+    name: 'სამზარეულო და ჭურჭელი',
+    nameEn: 'Kitchen & Dining',
+    description: 'ჭურჭელი, დანები და აქსესუარები სამზარეულოსთვის.',
+    brands: ['Tefal', 'Zwilling', 'Fiskars', 'IKEA', 'Luminarc', 'Pyrex', 'WMF', 'Berghoff'],
+    models: ['Classic', 'Chef', 'Titanium', 'Ceramic', 'Pro', 'Daily', 'Gourmet', 'Master'],
+    price: [10, 950],
+    warranty: [12, 24, 60],
+    filters: [
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['ტაფა', 'ქვაბი', 'დანა', 'თეფში', 'ჭიქა', 'საჭრელი დაფა', 'კომპლექტი'] },
+      { key: 'material', label: 'მასალა', type: 'checkbox', options: ['უჟანგავი ფოლადი', 'კერამიკა', 'შუშა', 'ანტიმიწებავი', 'ჩუგუნი', 'ბამბუკი'] },
+      { key: 'dishwasher', label: 'ჭურჭლის სარეცხი', type: 'radio', options: ['შესაძლებელია', 'არ შეიძლება'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ტიპი': attrs.type,
+      'მასალა': attrs.material,
+      'ჭურჭლის სარეცხი მანქანა': attrs.dishwasher,
+      'დიამეტრი': `${int(rng, 16, 32)} სმ`,
+      'მოცულობა': `${(0.2 + rng() * 5).toFixed(1)} ლ`,
+      'ინდუქციისთვის': pick(rng, ['დიახ', 'არა']),
+      'ღუმელში გამოყენება': pick(rng, ['დიახ, 180°C-მდე', 'დიახ, 240°C-მდე', 'არა']),
+      'კომპლექტში': `${int(rng, 1, 12)} ცალი`,
+    }),
+  },
+
+  {
+    slug: 'auto',
+    name: 'ავტო-აქსესუარები',
+    nameEn: 'Auto Accessories',
+    description: 'აქსესუარები და მოვლის საშუალებები ავტომობილისთვის.',
+    brands: ['Bosch', 'Michelin', 'Baseus', 'Hoco', 'Osram', 'Castrol', 'Liqui Moly', 'Thule'],
+    models: ['Pro', 'Universal', 'Compact', 'Premium', 'Sport', 'Basic', 'Plus', 'Max'],
+    price: [15, 1400],
+    warranty: [6, 12, 24],
+    filters: [
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['ვიდეორეგისტრატორი', 'სავარძლის გადასაფარებელი', 'ტელეფონის სამაგრი', 'კომპრესორი', 'ნათურა', 'ძრავის ზეთი'] },
+      { key: 'fit', label: 'თავსებადობა', type: 'radio', options: ['უნივერსალური', 'კონკრეტული მოდელი'] },
+      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'ნაცრისფერი', 'ბეჟი', 'ვერცხლისფერი'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ტიპი': attrs.type,
+      'თავსებადობა': attrs.fit,
+      'მასალა': pick(rng, ['ABS პლასტმასი', 'ეკო-ტყავი', 'ალუმინი', 'სილიკონი', 'ტექსტილი']),
+      'კვება': pick(rng, ['12V', '24V', '12V/24V', 'USB-C', 'არ საჭიროებს']),
+      'ზომები': `${int(rng, 5, 60)}×${int(rng, 4, 45)}×${int(rng, 2, 25)} სმ`,
+      'წონა': `${(0.05 + rng() * 6).toFixed(2)} კგ`,
+      'ფერი': attrs.color,
+    }),
+  },
+
+  {
+    slug: 'pets',
+    name: 'ცხოველების საქონელი',
+    nameEn: 'Pet Supplies',
+    description: 'საკვები, აქსესუარები და მოვლის საშუალებები შინაური ცხოველებისთვის.',
+    brands: ['Royal Canin', 'Purina', 'Whiskas', 'Pedigree', 'Trixie', 'Ferplast', 'Josera', 'Acana'],
+    models: ['Adult', 'Junior', 'Senior', 'Indoor', 'Sensitive', 'Active', 'Light', 'Care'],
+    price: [8, 480],
+    warranty: [0, 6, 12],
+    filters: [
+      { key: 'animal', label: 'ცხოველი', type: 'checkbox', options: ['ძაღლი', 'კატა', 'ფრინველი', 'თევზი', 'მღრღნელი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['მშრალი საკვები', 'სველი საკვები', 'სათამაშო', 'საწოლი', 'საყელური', 'გადამტანი'] },
+      { key: 'size', label: 'ზომა', type: 'checkbox', options: ['პატარა', 'საშუალო', 'დიდი'] },
+    ],
+    specs: (rng, attrs) => ({
+      'ცხოველი': attrs.animal,
+      'ტიპი': attrs.type,
+      'ზომა': attrs.size,
+      'ასაკი': pick(rng, ['ლეკვი / ბოკვერი', '1-7 წელი', '7+ წელი', 'ყველა ასაკი']),
+      'წონა / მოცულობა': `${(0.1 + rng() * 14).toFixed(1)} კგ`,
+      'შემადგენლობა': pick(rng, ['ქათამი და ბრინჯი', 'ორაგული', 'ხბოს ხორცი', 'ინდაური', 'ბატკანი']),
+      'მასალა': pick(rng, ['ტექსტილი', 'ნეილონი', 'პლასტმასი', 'ბუნებრივი რეზინი', '—']),
+      'წარმოება': pick(rng, ['საფრანგეთი', 'გერმანია', 'იტალია', 'კანადა', 'პოლონეთი']),
+    }),
+  },
+]
+
+export const helpers = { pick, int }

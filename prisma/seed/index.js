@@ -1,0 +1,133 @@
+import 'dotenv/config'
+import { PrismaClient } from '@prisma/client'
+import { categories } from './categories.js'
+
+const prisma = new PrismaClient()
+
+const PRODUCTS_PER_CATEGORY = 40
+const IMAGES_PER_PRODUCT = 5
+
+/** დეტერმინისტული RNG — ერთი და იგივე seed ყოველთვის ერთსა და იმავე კატალოგს იძლევა */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7)
+
+const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)]
+const int = (rng, min, max) => min + Math.floor(rng() * (max - min + 1))
+const round = (n, step) => Math.round(n / step) * step
+
+const translit = (s) => s
+  .toLowerCase()
+  .replace(/[ა-ჰ]/g, (c) => 'abgdevzTiklmnopJrstufqRySCcZwWxjh'['აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'.indexOf(c)] || '-')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+
+function makeProduct(cat, i) {
+  const rng = mulberry32(hash(cat.slug) + i * 7919)
+
+  const brand = pick(rng, cat.brands)
+  const model = pick(rng, cat.models)
+  const serial = int(rng, 2, 99)
+
+  const attrs = {}
+  for (const f of cat.filters) attrs[f.key] = pick(rng, f.options)
+
+  const hasType = cat.filters.some((f) => f.key === 'type')
+  const title = (hasType ? `${attrs.type} ${brand} ${model} ${serial}` : `${brand} ${model} ${serial}`).trim()
+  const slug = `${cat.slug}-${translit(`${brand}-${model}`)}-${serial}-${i}`
+
+  const [pMin, pMax] = cat.price
+  const raw = pMin + Math.pow(rng(), 1.6) * (pMax - pMin)
+  const price = Math.max(pMin, round(raw, raw > 500 ? 10 : 1)) - 0.01 + 0.01
+
+  const onSale = rng() < 0.35
+  const oldPrice = onSale ? round(price * (1.12 + rng() * 0.35), 5) : null
+
+  const specs = cat.specs(rng, attrs)
+  const warrantyMonths = pick(rng, cat.warranty)
+  if (warrantyMonths > 0) specs['გარანტია'] = `${warrantyMonths} თვე`
+
+  const images = Array.from({ length: IMAGES_PER_PRODUCT }, (_, n) =>
+    `https://picsum.photos/seed/${slug}-${n + 1}/900/900`)
+
+  const stock = rng() < 0.12 ? 0 : int(rng, 1, 140)
+
+  const description =
+    `${title} — ${cat.name.toLowerCase()} ${brand}-ისგან. ` +
+    `${Object.entries(specs).slice(0, 3).map(([k, v]) => `${k}: ${v}`).join(', ')}. ` +
+    (warrantyMonths > 0 ? `მოყვება ${warrantyMonths}-თვიანი გარანტია. ` : '') +
+    `${pick(rng, [
+      'პროდუქტი ხელმისაწვდომია მიწოდებით საქართველოს მასშტაბით.',
+      'შეკვეთა მუშავდება 24 საათში.',
+      'ორიგინალი პროდუქცია ოფიციალური იმპორტიორისგან.',
+      'დაბრუნების შესაძლებლობა 14 დღის განმავლობაში.',
+    ])}`
+
+  return {
+    slug,
+    title,
+    description,
+    brand,
+    price: Number(price.toFixed(2)),
+    oldPrice: oldPrice ? Number(oldPrice.toFixed(2)) : null,
+    currency: 'GEL',
+    rating: Number((3.2 + rng() * 1.8).toFixed(1)),
+    reviewsCount: int(rng, 0, 940),
+    stock,
+    warrantyMonths,
+    images: JSON.stringify(images),
+    specs: JSON.stringify(specs),
+    attributes: attrs,
+  }
+}
+
+async function main() {
+  console.log('კატალოგის გასუფთავება...')
+  await prisma.productAttribute.deleteMany()
+  await prisma.product.deleteMany()
+  await prisma.category.deleteMany()
+
+  let total = 0
+
+  for (const [index, cat] of categories.entries()) {
+    const category = await prisma.category.create({
+      data: {
+        slug: cat.slug,
+        name: cat.name,
+        nameEn: cat.nameEn,
+        description: cat.description,
+        image: `https://picsum.photos/seed/cat-${cat.slug}/1200/500`,
+        sortOrder: index,
+        filters: JSON.stringify(cat.filters),
+      },
+    })
+
+    for (let i = 0; i < PRODUCTS_PER_CATEGORY; i++) {
+      const { attributes, ...data } = makeProduct(cat, i)
+      await prisma.product.create({
+        data: {
+          ...data,
+          categoryId: category.id,
+          attributes: {
+            create: Object.entries(attributes).map(([key, value]) => ({ key, value })),
+          },
+        },
+      })
+      total++
+    }
+
+    console.log(`  ${cat.name.padEnd(28)} ${PRODUCTS_PER_CATEGORY} პროდუქტი`)
+  }
+
+  console.log(`\n✓ ${categories.length} კატეგორია, ${total} პროდუქტი, ${total * IMAGES_PER_PRODUCT} სურათი`)
+}
+
+main()
+  .catch((e) => { console.error(e); process.exit(1) })
+  .finally(() => prisma.$disconnect())
