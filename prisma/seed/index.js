@@ -5,6 +5,8 @@ import { categories } from './categories.js'
 const prisma = new PrismaClient()
 
 const PRODUCTS_PER_CATEGORY = 40
+/** კატალოგის ვერსია — გაზრდისას პროდაქშენი ავტომატურად გადააგენერირებს */
+export const CATALOG_VERSION = '2'
 const IMAGES_PER_PRODUCT = 5
 
 /** დეტერმინისტული RNG — ერთი და იგივე seed ყოველთვის ერთსა და იმავე კატალოგს იძლევა */
@@ -40,7 +42,7 @@ function makeProduct(cat, i) {
 
   const hasType = cat.filters.some((f) => f.key === 'type')
   const title = (hasType ? `${attrs.type} ${brand} ${model} ${serial}` : `${brand} ${model} ${serial}`).trim()
-  const slug = `${cat.slug}-${translit(`${brand}-${model}`)}-${serial}-${i}`
+  const slug = translit(title)
 
   const [pMin, pMax] = cat.price
   const raw = pMin + Math.pow(rng(), 1.6) * (pMax - pMin)
@@ -87,8 +89,12 @@ function makeProduct(cat, i) {
   }
 }
 
+/** cuid-ის მსგავსი იდენტიფიკატორი — 25 სიმბოლო, ისევე როგორც Prisma-ს @default(cuid()) */
 let counter = 0
-const makeId = (prefix) => `${prefix}${Date.now().toString(36)}${(counter++).toString(36).padStart(4, '0')}`
+const B36 = 'abcdefghijklmnopqrstuvwxyz0123456789'
+const rand = (n) => Array.from({ length: n }, () => B36[Math.floor(Math.random() * B36.length)]).join('')
+const makeId = () =>
+  'c' + Date.now().toString(36) + (counter++).toString(36).padStart(4, '0') + rand(12)
 
 /** აშენებს მთელ კატალოგს. `prisma` გარედან მოდის, რომ ორივე სცენარში გამოდგეს. */
 export async function seedCatalog(prisma, { log = console.log } = {}) {
@@ -113,13 +119,20 @@ export async function seedCatalog(prisma, { log = console.log } = {}) {
 
     const products = []
     const attributes = []
+    const usedSlugs = new Map()
 
     for (let i = 0; i < PRODUCTS_PER_CATEGORY; i++) {
       const { attributes: attrs, ...data } = makeProduct(cat, i)
-      const id = makeId('p')
+
+      // დუბლიკატი slug-ს ემატება რიგითობა — ისევე, როგორც რეალურ CMS-ებში
+      const seen = usedSlugs.get(data.slug) ?? 0
+      usedSlugs.set(data.slug, seen + 1)
+      if (seen > 0) data.slug = `${data.slug}-${seen + 1}`
+
+      const id = makeId()
       products.push({ id, ...data, categoryId: category.id })
       for (const [key, value] of Object.entries(attrs)) {
-        attributes.push({ id: makeId('a'), productId: id, key, value })
+        attributes.push({ id: makeId(), productId: id, key, value })
       }
     }
 
@@ -133,13 +146,28 @@ export async function seedCatalog(prisma, { log = console.log } = {}) {
   return { categories: categories.length, products: total }
 }
 
-/** ავსებს კატალოგს მხოლოდ მაშინ, თუ ის ცარიელია (გაშვებისას ირთვება) */
+/** ავსებს კატალოგს, თუ ის ცარიელია ან ვერსია შეიცვალა */
 export async function ensureCatalog(prisma) {
-  const existing = await prisma.category.count()
-  if (existing > 0) return { skipped: true, categories: existing }
+  const [count, meta] = await Promise.all([
+    prisma.category.count(),
+    prisma.meta.findUnique({ where: { key: 'catalogVersion' } }).catch(() => null),
+  ])
 
-  console.log('კატალოგი ცარიელია — ვავსებ...')
+  if (count > 0 && meta?.value === CATALOG_VERSION) {
+    return { skipped: true, categories: count }
+  }
+
+  console.log(count === 0
+    ? 'კატალოგი ცარიელია — ვავსებ...'
+    : `კატალოგის ვერსია ${meta?.value ?? '?'} → ${CATALOG_VERSION}, გადავაგენერირებ...`)
+
   const result = await seedCatalog(prisma)
+  await prisma.meta.upsert({
+    where: { key: 'catalogVersion' },
+    create: { key: 'catalogVersion', value: CATALOG_VERSION },
+    update: { value: CATALOG_VERSION },
+  })
+
   console.log(`✓ ${result.categories} კატეგორია, ${result.products} პროდუქტი`)
   return result
 }

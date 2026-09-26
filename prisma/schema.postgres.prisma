@@ -77,3 +77,8 @@ model ProductAttribute {
   @@index([productId])
   @@index([key, value])
 }
+
+model Meta {
+  key   String @id
+  value String
+}
