@@ -250,6 +250,10 @@ info:
       თუ `test@test.com` დაკავებულია, აიღე სხვა — ან დაამუშავე `409 EMAIL_TAKEN`
 
 servers:
+  - url: /api
+    description: მიმდინარე სერვერი (ავტომატურად)
+  - url: https://shop-api-kbe6.onrender.com/api
+    description: პროდაქშენი
   - url: http://localhost:4000/api
     description: ლოკალური
 
