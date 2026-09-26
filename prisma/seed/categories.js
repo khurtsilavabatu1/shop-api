@@ -1,14 +1,14 @@
 /**
  * 12 კატეგორია სხვადასხვა სფეროდან.
  *
- * თითო კატეგორიას აქვს:
- *   brands   — ბრენდები, რომელთაგანაც პროდუქტები აიგება
- *   models   — მოდელის სახელის ნაწილები
- *   price    — [მინ, მაქს] ფასის დიაპაზონი ₾
- *   warranty — შესაძლო გარანტიის ვადები თვეებში
- *   specs    — ფუნქცია, რომელიც აბრუნებს ამ კატეგორიისთვის შესაბამის მახასიათებლებს
- *   filters  — გასაფილტრი ატრიბუტები (ფრონტი ამათგან აგებს ფილტრების პანელს)
+ * ფილტრის ოფცია ყოველთვის წყვილია:
+ *   value — ინგლისური, URL-ისთვის:  ?type=sofa&material=oak
+ *   label — ქართული, ინტერფეისისთვის: „დივანი", „მუხა"
+ *
+ * ასე URL სუფთა რჩება და ენის შეცვლა ლეიბლების შეცვლას ნიშნავს, არა API-ის.
  */
+
+const o = (value, label) => ({ value, label })
 
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)]
 const int = (rng, min, max) => min + Math.floor(rng() * (max - min + 1))
@@ -24,24 +24,24 @@ export const categories = [
     price: [450, 4200],
     warranty: [12, 24],
     filters: [
-      { key: 'storage', label: 'მეხსიერება', type: 'checkbox', options: ['64GB', '128GB', '256GB', '512GB', '1TB'] },
-      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'თეთრი', 'ლურჯი', 'მწვანე', 'ვარდისფერი', 'ოქროსფერი'] },
-      { key: 'ram', label: 'ოპერატიული', type: 'checkbox', options: ['4GB', '6GB', '8GB', '12GB', '16GB'] },
-      { key: 'os', label: 'სისტემა', type: 'radio', options: ['iOS', 'Android'] },
+      { key: 'storage', label: 'მეხსიერება', type: 'checkbox', options: ['64gb:64GB', '128gb:128GB', '256gb:256GB', '512gb:512GB', '1tb:1TB'].map(s => o(...s.split(':'))) },
+      { key: 'ram', label: 'ოპერატიული', type: 'checkbox', options: ['4gb:4GB', '6gb:6GB', '8gb:8GB', '12gb:12GB', '16gb:16GB'].map(s => o(...s.split(':'))) },
+      { key: 'color', label: 'ფერი', type: 'color', options: [o('black', 'შავი'), o('white', 'თეთრი'), o('blue', 'ლურჯი'), o('green', 'მწვანე'), o('pink', 'ვარდისფერი'), o('gold', 'ოქროსფერი')] },
+      { key: 'os', label: 'სისტემა', type: 'radio', options: [o('ios', 'iOS'), o('android', 'Android')] },
     ],
-    specs: (rng, attrs) => ({
+    specs: (rng, a) => ({
       'ეკრანი': `${(5.4 + rng() * 1.6).toFixed(1)}" ${pick(rng, ['OLED', 'AMOLED', 'IPS LCD'])}`,
       'განახლების სიხშირე': pick(rng, ['60Hz', '90Hz', '120Hz', '144Hz']),
-      'პროცესორი': pick(rng, ['Snapdragon 8 Gen 3', 'A17 Pro', 'Dimensity 9300', 'Exynos 2400', 'Tensor G3']),
-      'ოპერატიული მეხსიერება': attrs.ram,
-      'მეხსიერება': attrs.storage,
+      'პროცესორი': a.os.value === 'ios' ? pick(rng, ['A16 Bionic', 'A17 Pro', 'A18 Pro']) : pick(rng, ['Snapdragon 8 Gen 3', 'Dimensity 9300', 'Exynos 2400', 'Tensor G3']),
+      'ოპერატიული მეხსიერება': a.ram.label,
+      'მეხსიერება': a.storage.label,
       'ძირითადი კამერა': `${pick(rng, ['48', '50', '64', '108', '200'])} MP`,
       'წინა კამერა': `${pick(rng, ['12', '16', '32'])} MP`,
       'ბატარეა': `${int(rng, 3200, 5500)} mAh`,
-      'დატენვა': `${pick(rng, ['20W', '33W', '67W', '80W', '120W'])}`,
-      'ოპერაციული სისტემა': attrs.os === 'iOS' ? `iOS ${int(rng, 16, 18)}` : `Android ${int(rng, 13, 15)}`,
+      'დატენვა': pick(rng, ['20W', '33W', '67W', '80W', '120W']),
+      'ოპერაციული სისტემა': a.os.value === 'ios' ? `iOS ${int(rng, 16, 18)}` : `Android ${int(rng, 13, 15)}`,
       'დაცვა': pick(rng, ['IP67', 'IP68', 'IP54']),
-      'ფერი': attrs.color,
+      'ფერი': a.color.label,
     }),
   },
 
@@ -55,22 +55,22 @@ export const categories = [
     price: [1200, 9500],
     warranty: [12, 24, 36],
     filters: [
-      { key: 'cpu', label: 'პროცესორი', type: 'checkbox', options: ['Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7', 'Apple M3'] },
-      { key: 'ram', label: 'ოპერატიული', type: 'checkbox', options: ['8GB', '16GB', '32GB', '64GB'] },
-      { key: 'storage', label: 'დისკი', type: 'checkbox', options: ['256GB SSD', '512GB SSD', '1TB SSD', '2TB SSD'] },
-      { key: 'screen', label: 'ეკრანი', type: 'checkbox', options: ['13"', '14"', '15.6"', '16"', '17"'] },
+      { key: 'cpu', label: 'პროცესორი', type: 'checkbox', options: [o('core-i5', 'Intel Core i5'), o('core-i7', 'Intel Core i7'), o('core-i9', 'Intel Core i9'), o('ryzen-5', 'AMD Ryzen 5'), o('ryzen-7', 'AMD Ryzen 7'), o('apple-m3', 'Apple M3')] },
+      { key: 'ram', label: 'ოპერატიული', type: 'checkbox', options: ['8gb:8GB', '16gb:16GB', '32gb:32GB', '64gb:64GB'].map(s => o(...s.split(':'))) },
+      { key: 'storage', label: 'დისკი', type: 'checkbox', options: [o('256gb-ssd', '256GB SSD'), o('512gb-ssd', '512GB SSD'), o('1tb-ssd', '1TB SSD'), o('2tb-ssd', '2TB SSD')] },
+      { key: 'screen', label: 'ეკრანი', type: 'checkbox', options: [o('13', '13"'), o('14', '14"'), o('15', '15.6"'), o('16', '16"'), o('17', '17"')] },
     ],
-    specs: (rng, attrs) => ({
-      'პროცესორი': attrs.cpu,
-      'ოპერატიული მეხსიერება': attrs.ram,
-      'დისკი': attrs.storage,
-      'ეკრანი': `${attrs.screen} ${pick(rng, ['IPS', 'OLED', 'Retina'])} ${pick(rng, ['1920×1080', '2560×1440', '2880×1800', '3840×2160'])}`,
-      'ვიდეობარათი': pick(rng, ['Intel Iris Xe', 'NVIDIA RTX 4050', 'NVIDIA RTX 4060', 'NVIDIA RTX 4070', 'AMD Radeon 780M', 'Apple GPU 10-core']),
+    specs: (rng, a) => ({
+      'პროცესორი': a.cpu.label,
+      'ოპერატიული მეხსიერება': a.ram.label,
+      'დისკი': a.storage.label,
+      'ეკრანი': `${a.screen.label} ${pick(rng, ['IPS', 'OLED', 'Retina'])} ${pick(rng, ['1920×1080', '2560×1440', '2880×1800', '3840×2160'])}`,
+      'ვიდეობარათი': a.cpu.value === 'apple-m3' ? 'Apple GPU 10-core' : pick(rng, ['Intel Iris Xe', 'NVIDIA RTX 4050', 'NVIDIA RTX 4060', 'NVIDIA RTX 4070', 'AMD Radeon 780M']),
       'კლავიატურა': pick(rng, ['განათებული', 'სტანდარტული', 'განათებული, ქართული']),
       'პორტები': pick(rng, ['2×USB-C, 2×USB-A, HDMI', '3×USB-C, HDMI, SD', '2×Thunderbolt 4, USB-A']),
       'ბატარეა': `${int(rng, 45, 99)} Wh`,
       'წონა': `${(1.1 + rng() * 1.6).toFixed(2)} კგ`,
-      'ოპერაციული სისტემა': pick(rng, ['Windows 11 Home', 'Windows 11 Pro', 'macOS', 'უსისტემო']),
+      'ოპერაციული სისტემა': a.cpu.value === 'apple-m3' ? 'macOS' : pick(rng, ['Windows 11 Home', 'Windows 11 Pro', 'უსისტემო']),
     }),
   },
 
@@ -84,20 +84,20 @@ export const categories = [
     price: [350, 6500],
     warranty: [24, 36, 60],
     filters: [
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['მაცივარი', 'სარეცხი მანქანა', 'ჭურჭლის სარეცხი', 'ღუმელი', 'მიკროტალღური', 'გამწოვი'] },
-      { key: 'energy', label: 'ენერგოკლასი', type: 'checkbox', options: ['A', 'A+', 'A++', 'A+++'] },
-      { key: 'color', label: 'ფერი', type: 'color', options: ['თეთრი', 'ვერცხლისფერი', 'შავი', 'ინოქსი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('fridge', 'მაცივარი'), o('washer', 'სარეცხი მანქანა'), o('dishwasher', 'ჭურჭლის სარეცხი'), o('oven', 'ღუმელი'), o('microwave', 'მიკროტალღური'), o('hood', 'გამწოვი')] },
+      { key: 'energy', label: 'ენერგოკლასი', type: 'checkbox', options: [o('a', 'A'), o('a-plus', 'A+'), o('a-plus-2', 'A++'), o('a-plus-3', 'A+++')] },
+      { key: 'color', label: 'ფერი', type: 'color', options: [o('white', 'თეთრი'), o('silver', 'ვერცხლისფერი'), o('black', 'შავი'), o('inox', 'ინოქსი')] },
     ],
-    specs: (rng, attrs) => ({
-      'ტიპი': attrs.type,
-      'ენერგოკლასი': attrs.energy,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'ენერგოკლასი': a.energy.label,
       'სიმძლავრე': `${int(rng, 800, 2400)} ვტ`,
       'მოცულობა': `${int(rng, 40, 450)} ლ`,
       'ხმაურის დონე': `${int(rng, 38, 62)} დბ`,
       'ზომები (ს×ს×ს)': `${int(rng, 55, 190)}×${int(rng, 45, 70)}×${int(rng, 50, 75)} სმ`,
       'წონა': `${int(rng, 25, 95)} კგ`,
       'მართვა': pick(rng, ['ელექტრონული', 'სენსორული', 'მექანიკური']),
-      'ფერი': attrs.color,
+      'ფერი': a.color.label,
     }),
   },
 
@@ -111,19 +111,19 @@ export const categories = [
     price: [120, 4800],
     warranty: [12, 24, 36],
     filters: [
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['დივანი', 'სავარძელი', 'მაგიდა', 'სკამი', 'კარადა', 'საწოლი', 'თარო'] },
-      { key: 'material', label: 'მასალა', type: 'checkbox', options: ['მუხა', 'წიფელი', 'MDF', 'ლითონი', 'მინა', 'ტექსტილი', 'ეკო-ტყავი'] },
-      { key: 'color', label: 'ფერი', type: 'color', options: ['ნატურალური', 'თეთრი', 'შავი', 'ნაცრისფერი', 'ყავისფერი', 'ლურჯი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('sofa', 'დივანი'), o('armchair', 'სავარძელი'), o('table', 'მაგიდა'), o('chair', 'სკამი'), o('wardrobe', 'კარადა'), o('bed', 'საწოლი'), o('shelf', 'თარო')] },
+      { key: 'material', label: 'მასალა', type: 'checkbox', options: [o('oak', 'მუხა'), o('beech', 'წიფელი'), o('mdf', 'MDF'), o('metal', 'ლითონი'), o('glass', 'მინა'), o('textile', 'ტექსტილი'), o('eco-leather', 'ეკო-ტყავი')] },
+      { key: 'color', label: 'ფერი', type: 'color', options: [o('natural', 'ნატურალური'), o('white', 'თეთრი'), o('black', 'შავი'), o('grey', 'ნაცრისფერი'), o('brown', 'ყავისფერი'), o('blue', 'ლურჯი')] },
     ],
-    specs: (rng, attrs) => ({
-      'ტიპი': attrs.type,
-      'მასალა': attrs.material,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'მასალა': a.material.label,
       'ზომები (ს×ს×ს)': `${int(rng, 40, 220)}×${int(rng, 35, 110)}×${int(rng, 40, 210)} სმ`,
       'წონა': `${int(rng, 4, 85)} კგ`,
       'მაქს. დატვირთვა': `${int(rng, 80, 300)} კგ`,
       'აწყობა': pick(rng, ['საჭიროა', 'არ საჭიროებს', 'ნაწილობრივ აწყობილი']),
       'კარკასი': pick(rng, ['მასიური ხე', 'ლამინირებული MDF', 'ფოლადის კარკასი']),
-      'ფერი': attrs.color,
+      'ფერი': a.color.label,
     }),
   },
 
@@ -137,18 +137,18 @@ export const categories = [
     price: [25, 3200],
     warranty: [6, 12, 24],
     filters: [
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['დუმბელი', 'იოგა-ხალიჩა', 'ველოტრენაჟორი', 'ბურთი', 'ექსპანდერი', 'სავარჯიშო სკამი'] },
-      { key: 'level', label: 'დონე', type: 'radio', options: ['დამწყები', 'საშუალო', 'პროფესიონალი'] },
-      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'ნაცრისფერი', 'ლურჯი', 'წითელი', 'მწვანე'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('dumbbell', 'დუმბელი'), o('yoga-mat', 'იოგა-ხალიჩა'), o('exercise-bike', 'ველოტრენაჟორი'), o('ball', 'ბურთი'), o('expander', 'ექსპანდერი'), o('bench', 'სავარჯიშო სკამი')] },
+      { key: 'level', label: 'დონე', type: 'radio', options: [o('beginner', 'დამწყები'), o('intermediate', 'საშუალო'), o('pro', 'პროფესიონალი')] },
+      { key: 'color', label: 'ფერი', type: 'color', options: [o('black', 'შავი'), o('grey', 'ნაცრისფერი'), o('blue', 'ლურჯი'), o('red', 'წითელი'), o('green', 'მწვანე')] },
     ],
-    specs: (rng, attrs) => ({
-      'ტიპი': attrs.type,
-      'დონე': attrs.level,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'დონე': a.level.label,
       'მასალა': pick(rng, ['რეზინი', 'ფოლადი', 'ნეოპრენი', 'TPE', 'PVC', 'ჩუგუნი']),
       'წონა': `${(0.3 + rng() * 24).toFixed(1)} კგ`,
       'ზომები': `${int(rng, 20, 180)}×${int(rng, 15, 65)} სმ`,
       'მაქს. დატვირთვა': `${int(rng, 80, 150)} კგ`,
-      'ფერი': attrs.color,
+      'ფერი': a.color.label,
     }),
   },
 
@@ -162,14 +162,14 @@ export const categories = [
     price: [12, 320],
     warranty: [0],
     filters: [
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['კრემი', 'შამპუნი', 'სერუმი', 'ტონიკი', 'მასკა', 'ნიღაბი', 'მზისგან დამცავი'] },
-      { key: 'skinType', label: 'კანის ტიპი', type: 'checkbox', options: ['მშრალი', 'ცხიმიანი', 'კომბინირებული', 'მგრძნობიარე', 'ნორმალური'] },
-      { key: 'volume', label: 'მოცულობა', type: 'checkbox', options: ['30მლ', '50მლ', '100მლ', '200მლ', '400მლ'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('cream', 'კრემი'), o('shampoo', 'შამპუნი'), o('serum', 'სერუმი'), o('toner', 'ტონიკი'), o('mask', 'ნიღაბი'), o('sunscreen', 'მზისგან დამცავი')] },
+      { key: 'skin-type', label: 'კანის ტიპი', type: 'checkbox', options: [o('dry', 'მშრალი'), o('oily', 'ცხიმიანი'), o('combination', 'კომბინირებული'), o('sensitive', 'მგრძნობიარე'), o('normal', 'ნორმალური')] },
+      { key: 'volume', label: 'მოცულობა', type: 'checkbox', options: [o('30ml', '30მლ'), o('50ml', '50მლ'), o('100ml', '100მლ'), o('200ml', '200მლ'), o('400ml', '400მლ')] },
     ],
-    specs: (rng, attrs) => ({
-      'ტიპი': attrs.type,
-      'კანის ტიპი': attrs.skinType,
-      'მოცულობა': attrs.volume,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'კანის ტიპი': a['skin-type'].label,
+      'მოცულობა': a.volume.label,
       'ძირითადი კომპონენტი': pick(rng, ['ჰიალურონის მჟავა', 'ვიტამინი C', 'ნიაცინამიდი', 'რეტინოლი', 'ცერამიდები', 'ალოე ვერა']),
       'გამოყენება': pick(rng, ['დილით', 'საღამოს', 'დილით და საღამოს', 'კვირაში 2-ჯერ']),
       'ასაკი': pick(rng, ['18+', '25+', '35+', '45+']),
@@ -183,19 +183,19 @@ export const categories = [
     name: 'წიგნები',
     nameEn: 'Books',
     description: 'მხატვრული და პროფესიული ლიტერატურა ქართულ და უცხო ენებზე.',
-    brands: ['პალიტრა L', 'სულაკაური', 'ინტელექტი', 'ბაკურ სულაკაური', 'არტანუჯი', 'დიოგენე', 'Penguin', 'O\'Reilly'],
-    models: ['ტომი I', 'ტომი II', 'შევსებული', 'ახალი გამოცემა', 'ჯიბის ფორმატი', 'ილუსტრირებული'],
+    brands: ['Palitra L', 'Sulakauri', 'Intelekti', 'Artanuji', 'Diogene', 'Penguin', 'O\'Reilly', 'Manning'],
+    models: ['Volume I', 'Volume II', 'Revised', 'New Edition', 'Pocket', 'Illustrated', 'Collected', 'Annotated'],
     price: [8, 150],
     warranty: [0],
     filters: [
-      { key: 'genre', label: 'ჟანრი', type: 'checkbox', options: ['რომანი', 'დეტექტივი', 'ფანტასტიკა', 'ბიოგრაფია', 'ბიზნესი', 'პროგრამირება', 'საბავშვო', 'ისტორია'] },
-      { key: 'language', label: 'ენა', type: 'radio', options: ['ქართული', 'ინგლისური', 'რუსული'] },
-      { key: 'cover', label: 'ყდა', type: 'radio', options: ['მაგარი', 'რბილი'] },
+      { key: 'genre', label: 'ჟანრი', type: 'checkbox', options: [o('novel', 'რომანი'), o('detective', 'დეტექტივი'), o('sci-fi', 'ფანტასტიკა'), o('biography', 'ბიოგრაფია'), o('business', 'ბიზნესი'), o('programming', 'პროგრამირება'), o('children', 'საბავშვო'), o('history', 'ისტორია')] },
+      { key: 'language', label: 'ენა', type: 'radio', options: [o('ka', 'ქართული'), o('en', 'ინგლისური'), o('ru', 'რუსული')] },
+      { key: 'cover', label: 'ყდა', type: 'radio', options: [o('hardcover', 'მაგარი'), o('paperback', 'რბილი')] },
     ],
-    specs: (rng, attrs) => ({
-      'ჟანრი': attrs.genre,
-      'ენა': attrs.language,
-      'ყდა': attrs.cover,
+    specs: (rng, a) => ({
+      'ჟანრი': a.genre.label,
+      'ენა': a.language.label,
+      'ყდა': a.cover.label,
       'გვერდების რაოდენობა': `${int(rng, 96, 980)}`,
       'გამოცემის წელი': `${int(rng, 2005, 2026)}`,
       'ფორმატი': pick(rng, ['13×20 სმ', '14×21 სმ', '16×24 სმ', '17×24 სმ']),
@@ -214,14 +214,14 @@ export const categories = [
     price: [15, 850],
     warranty: [0, 6, 12],
     filters: [
-      { key: 'age', label: 'ასაკი', type: 'checkbox', options: ['0-1 წელი', '1-3 წელი', '3-6 წელი', '6-9 წელი', '9-12 წელი', '12+ წელი'] },
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['კონსტრუქტორი', 'სამაგიდო თამაში', 'რბილი სათამაშო', 'პაზლი', 'მანქანა', 'თოჯინა'] },
-      { key: 'gender', label: 'ვისთვის', type: 'radio', options: ['გოგონებისთვის', 'ბიჭებისთვის', 'უნივერსალური'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('construction', 'კონსტრუქტორი'), o('board-game', 'სამაგიდო თამაში'), o('plush', 'რბილი სათამაშო'), o('puzzle', 'პაზლი'), o('car', 'მანქანა'), o('doll', 'თოჯინა')] },
+      { key: 'age', label: 'ასაკი', type: 'checkbox', options: [o('0-1', '0-1 წელი'), o('1-3', '1-3 წელი'), o('3-6', '3-6 წელი'), o('6-9', '6-9 წელი'), o('9-12', '9-12 წელი'), o('12-plus', '12+ წელი')] },
+      { key: 'gender', label: 'ვისთვის', type: 'radio', options: [o('girls', 'გოგონებისთვის'), o('boys', 'ბიჭებისთვის'), o('unisex', 'უნივერსალური')] },
     ],
-    specs: (rng, attrs) => ({
-      'ასაკი': attrs.age,
-      'ტიპი': attrs.type,
-      'ვისთვის': attrs.gender,
+    specs: (rng, a) => ({
+      'ასაკი': a.age.label,
+      'ტიპი': a.type.label,
+      'ვისთვის': a.gender.label,
       'დეტალების რაოდენობა': `${int(rng, 1, 1800)}`,
       'მასალა': pick(rng, ['პლასტმასი', 'ხე', 'ტექსტილი', 'მუყაო', 'სილიკონი']),
       'ზომები': `${int(rng, 8, 60)}×${int(rng, 8, 45)}×${int(rng, 5, 30)} სმ`,
@@ -240,19 +240,20 @@ export const categories = [
     price: [25, 890],
     warranty: [0, 6],
     filters: [
-      { key: 'size', label: 'ზომა', type: 'checkbox', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
-      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'თეთრი', 'ლურჯი', 'ნაცრისფერი', 'ბეჟი', 'მწვანე', 'წითელი'] },
-      { key: 'gender', label: 'ვისთვის', type: 'radio', options: ['ქალის', 'მამაკაცის', 'უნისექსი'] },
-      { key: 'season', label: 'სეზონი', type: 'checkbox', options: ['ზაფხული', 'ზამთარი', 'დემისეზონური', 'ყველა სეზონი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('t-shirt', 'მაისური'), o('shirt', 'პერანგი'), o('jacket', 'ქურთუკი'), o('jeans', 'ჯინსი'), o('dress', 'კაბა'), o('sneakers', 'სპორტული ფეხსაცმელი'), o('hoodie', 'ჰუდი')] },
+      { key: 'size', label: 'ზომა', type: 'checkbox', options: ['xs:XS', 's:S', 'm:M', 'l:L', 'xl:XL', 'xxl:XXL'].map(s => o(...s.split(':'))) },
+      { key: 'color', label: 'ფერი', type: 'color', options: [o('black', 'შავი'), o('white', 'თეთრი'), o('blue', 'ლურჯი'), o('grey', 'ნაცრისფერი'), o('beige', 'ბეჟი'), o('green', 'მწვანე'), o('red', 'წითელი')] },
+      { key: 'gender', label: 'ვისთვის', type: 'radio', options: [o('women', 'ქალის'), o('men', 'მამაკაცის'), o('unisex', 'უნისექსი')] },
+      { key: 'season', label: 'სეზონი', type: 'checkbox', options: [o('summer', 'ზაფხული'), o('winter', 'ზამთარი'), o('demi', 'დემისეზონური'), o('all-season', 'ყველა სეზონი')] },
     ],
-    specs: (rng, attrs) => ({
-      'ზომა': attrs.size,
-      'ფერი': attrs.color,
-      'ვისთვის': attrs.gender,
-      'სეზონი': attrs.season,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'ზომა': a.size.label,
+      'ფერი': a.color.label,
+      'ვისთვის': a.gender.label,
+      'სეზონი': a.season.label,
       'მასალა': pick(rng, ['100% ბამბა', 'პოლიესტერი', 'ბამბა/ელასტანი', 'ტყავი', 'დენიმი', 'ბამბუკის ბოჭკო']),
       'რეცხვა': pick(rng, ['30°C მანქანით', '40°C მანქანით', 'მხოლოდ ხელით', 'ქიმწმენდა']),
-      'ჭრილი': pick(rng, ['Slim', 'Regular', 'Oversize', 'Relaxed']),
       'წარმოება': pick(rng, ['თურქეთი', 'პორტუგალია', 'ვიეტნამი', 'ბანგლადეში', 'ჩინეთი']),
     }),
   },
@@ -267,14 +268,14 @@ export const categories = [
     price: [10, 950],
     warranty: [12, 24, 60],
     filters: [
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['ტაფა', 'ქვაბი', 'დანა', 'თეფში', 'ჭიქა', 'საჭრელი დაფა', 'კომპლექტი'] },
-      { key: 'material', label: 'მასალა', type: 'checkbox', options: ['უჟანგავი ფოლადი', 'კერამიკა', 'შუშა', 'ანტიმიწებავი', 'ჩუგუნი', 'ბამბუკი'] },
-      { key: 'dishwasher', label: 'ჭურჭლის სარეცხი', type: 'radio', options: ['შესაძლებელია', 'არ შეიძლება'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('pan', 'ტაფა'), o('pot', 'ქვაბი'), o('knife', 'დანა'), o('plate', 'თეფში'), o('glass', 'ჭიქა'), o('cutting-board', 'საჭრელი დაფა'), o('set', 'კომპლექტი')] },
+      { key: 'material', label: 'მასალა', type: 'checkbox', options: [o('stainless-steel', 'უჟანგავი ფოლადი'), o('ceramic', 'კერამიკა'), o('glass', 'შუშა'), o('non-stick', 'ანტიმიწებავი'), o('cast-iron', 'ჩუგუნი'), o('bamboo', 'ბამბუკი')] },
+      { key: 'dishwasher', label: 'ჭურჭლის სარეცხი', type: 'radio', options: [o('yes', 'შესაძლებელია'), o('no', 'არ შეიძლება')] },
     ],
-    specs: (rng, attrs) => ({
-      'ტიპი': attrs.type,
-      'მასალა': attrs.material,
-      'ჭურჭლის სარეცხი მანქანა': attrs.dishwasher,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'მასალა': a.material.label,
+      'ჭურჭლის სარეცხი მანქანა': a.dishwasher.label,
       'დიამეტრი': `${int(rng, 16, 32)} სმ`,
       'მოცულობა': `${(0.2 + rng() * 5).toFixed(1)} ლ`,
       'ინდუქციისთვის': pick(rng, ['დიახ', 'არა']),
@@ -293,18 +294,18 @@ export const categories = [
     price: [15, 1400],
     warranty: [6, 12, 24],
     filters: [
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['ვიდეორეგისტრატორი', 'სავარძლის გადასაფარებელი', 'ტელეფონის სამაგრი', 'კომპრესორი', 'ნათურა', 'ძრავის ზეთი'] },
-      { key: 'fit', label: 'თავსებადობა', type: 'radio', options: ['უნივერსალური', 'კონკრეტული მოდელი'] },
-      { key: 'color', label: 'ფერი', type: 'color', options: ['შავი', 'ნაცრისფერი', 'ბეჟი', 'ვერცხლისფერი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('dashcam', 'ვიდეორეგისტრატორი'), o('seat-cover', 'სავარძლის გადასაფარებელი'), o('phone-mount', 'ტელეფონის სამაგრი'), o('compressor', 'კომპრესორი'), o('bulb', 'ნათურა'), o('engine-oil', 'ძრავის ზეთი')] },
+      { key: 'fit', label: 'თავსებადობა', type: 'radio', options: [o('universal', 'უნივერსალური'), o('model-specific', 'კონკრეტული მოდელი')] },
+      { key: 'color', label: 'ფერი', type: 'color', options: [o('black', 'შავი'), o('grey', 'ნაცრისფერი'), o('beige', 'ბეჟი'), o('silver', 'ვერცხლისფერი')] },
     ],
-    specs: (rng, attrs) => ({
-      'ტიპი': attrs.type,
-      'თავსებადობა': attrs.fit,
+    specs: (rng, a) => ({
+      'ტიპი': a.type.label,
+      'თავსებადობა': a.fit.label,
       'მასალა': pick(rng, ['ABS პლასტმასი', 'ეკო-ტყავი', 'ალუმინი', 'სილიკონი', 'ტექსტილი']),
       'კვება': pick(rng, ['12V', '24V', '12V/24V', 'USB-C', 'არ საჭიროებს']),
       'ზომები': `${int(rng, 5, 60)}×${int(rng, 4, 45)}×${int(rng, 2, 25)} სმ`,
       'წონა': `${(0.05 + rng() * 6).toFixed(2)} კგ`,
-      'ფერი': attrs.color,
+      'ფერი': a.color.label,
     }),
   },
 
@@ -318,14 +319,14 @@ export const categories = [
     price: [8, 480],
     warranty: [0, 6, 12],
     filters: [
-      { key: 'animal', label: 'ცხოველი', type: 'checkbox', options: ['ძაღლი', 'კატა', 'ფრინველი', 'თევზი', 'მღრღნელი'] },
-      { key: 'type', label: 'ტიპი', type: 'checkbox', options: ['მშრალი საკვები', 'სველი საკვები', 'სათამაშო', 'საწოლი', 'საყელური', 'გადამტანი'] },
-      { key: 'size', label: 'ზომა', type: 'checkbox', options: ['პატარა', 'საშუალო', 'დიდი'] },
+      { key: 'type', label: 'ტიპი', type: 'checkbox', options: [o('dry-food', 'მშრალი საკვები'), o('wet-food', 'სველი საკვები'), o('toy', 'სათამაშო'), o('bed', 'საწოლი'), o('collar', 'საყელური'), o('carrier', 'გადამტანი')] },
+      { key: 'animal', label: 'ცხოველი', type: 'checkbox', options: [o('dog', 'ძაღლი'), o('cat', 'კატა'), o('bird', 'ფრინველი'), o('fish', 'თევზი'), o('rodent', 'მღრღნელი')] },
+      { key: 'size', label: 'ზომა', type: 'checkbox', options: [o('small', 'პატარა'), o('medium', 'საშუალო'), o('large', 'დიდი')] },
     ],
-    specs: (rng, attrs) => ({
-      'ცხოველი': attrs.animal,
-      'ტიპი': attrs.type,
-      'ზომა': attrs.size,
+    specs: (rng, a) => ({
+      'ცხოველი': a.animal.label,
+      'ტიპი': a.type.label,
+      'ზომა': a.size.label,
       'ასაკი': pick(rng, ['ლეკვი / ბოკვერი', '1-7 წელი', '7+ წელი', 'ყველა ასაკი']),
       'წონა / მოცულობა': `${(0.1 + rng() * 14).toFixed(1)} კგ`,
       'შემადგენლობა': pick(rng, ['ქათამი და ბრინჯი', 'ორაგული', 'ხბოს ხორცი', 'ინდაური', 'ბატკანი']),

@@ -272,31 +272,51 @@ paths:
   /categories:
     get:
       tags: [Catalog]
-      summary: ყველა კატეგორია
+      summary: კატეგორიების სია
       description: |
-        აბრუნებს 12 კატეგორიას პროდუქტების რაოდენობითა და **ფილტრების განსაზღვრებებით**.
+        მსუბუქი სია მთავარი გვერდისა და ნავიგაციისთვის: სახელი, აღწერა, ბანერი,
+        პროდუქტების რაოდენობა.
 
-        თითო კატეგორიის `filters` მასივი აღწერს, რა ფილტრები უნდა დაიხატოს ამ
-        კატეგორიაზე. **ფილტრების პანელი ამ მონაცემებიდან აიგება, არა ჰარდკოდიდან** —
-        ტანსაცმელს „ზომა" და „სეზონი" აქვს, ლეპტოპს „პროცესორი" და „დისკი".
+        **ფილტრები აქ არ მოდის** — კატეგორიების სიაში ფილტრაცია არ ხდება,
+        და 12 კატეგორიის ფილტრების გამოთვლა ზედმეტი დატვირთვა იქნებოდა.
+        ფილტრები მოდის `/categories/{slug}`-ით, მაშინ, როცა მართლა გჭირდება.
 
-        ```json
-        { "key": "storage", "label": "მეხსიერება", "type": "checkbox",
-          "options": ["64GB", "128GB", "256GB"] }
-        ```
-        `type`: `checkbox` (მრავლობითი) · `radio` (ერთი) · `color` (ფერის ნიმუშები)
+        🔓 **ავტორიზაცია არ სჭირდება.**
       responses:
         "200": { description: OK }
 
   /categories/{slug}:
     get:
       tags: [Catalog]
-      summary: ერთი კატეგორია + ფასის დიაპაზონი და ბრენდები
+      summary: ერთი კატეგორია + ფილტრების სრული სია
       description: |
-        დამატებით აბრუნებს `priceRange` (მინ/მაქს ფასი ამ კატეგორიაში) და `brands` —
-        ფილტრების პანელის ასაგებად.
+        აბრუნებს კატეგორიას და **ერთ ერთიან `filters` მასივს**, რომელზეც ფრონტი
+        გადის და ყველა ფილტრს ერთნაირად ხატავს — ბრენდი, ფასი და ატრიბუტები
+        ერთსა და იმავე ფორმაშია.
+
+        ```json
+        { "key": "brand",    "label": "ბრენდი", "type": "checkbox",
+          "options": [{ "value": "IKEA", "label": "IKEA" }] }
+
+        { "key": "price",    "label": "ფასი",   "type": "range",
+          "min": 126, "max": 4790, "unit": "₾" }
+
+        { "key": "material", "label": "მასალა", "type": "checkbox",
+          "options": [{ "value": "oak", "label": "მუხა" }] }
+        ```
+
+        ## value vs label
+
+        - **`value`** — ინგლისური, URL-ში მიდის: `?material=oak`
+        - **`label`** — ქართული, ინტერფეისში ჩანს: „მუხა"
+
+        ასე URL სუფთა რჩება და ენის შეცვლა API-ს არ ეხება.
+
+        `type`: `checkbox` (მრავლობითი) · `radio` (ერთი) · `color` (ფერის ნიმუშები) · `range` (სლაიდერი)
+
+        🔓 **ავტორიზაცია არ სჭირდება.**
       parameters:
-        - { name: slug, in: path, required: true, schema: { type: string }, example: smartphones }
+        - { name: slug, in: path, required: true, schema: { type: string }, example: furniture }
       responses:
         "200": { description: OK }
         "404": { description: კატეგორია არ მოიძებნა }
@@ -328,13 +348,18 @@ paths:
         გამოიყენო ფილტრად — გასაღები აიღე კატეგორიის `filters`-იდან:
 
         ```
-        /products?category=smartphones&storage=256GB,512GB&color=შავი
-        /products?category=clothing&size=M&season=ზამთარი
-        /products?category=books&genre=ფანტასტიკა&language=ქართული
+        /products?category=smartphones&storage=256gb,512gb&color=black
+        /products?category=clothing&size=m&season=winter&gender=women
+        /products?category=furniture&type=sofa&material=oak
         ```
+
+        მნიშვნელობები ინგლისურია (`value` ფილტრის განსაზღვრებიდან) — URL-ის
+        დაშიფვრა არ გჭირდება.
 
         მრავალი მნიშვნელობა — მძიმით გამოყოფილი (`ან` ლოგიკა).
         სხვადასხვა ფილტრი ერთმანეთს ავსებს (`და` ლოგიკა).
+
+        🔓 **ავტორიზაცია არ სჭირდება** — კატალოგის დათვალიერება საჯაროა.
 
         ## 🔑 რეკომენდაცია
 

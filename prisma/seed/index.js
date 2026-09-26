@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 const PRODUCTS_PER_CATEGORY = 40
 /** კატალოგის ვერსია — გაზრდისას პროდაქშენი ავტომატურად გადააგენერირებს */
-export const CATALOG_VERSION = '2'
+export const CATALOG_VERSION = '3'
 const IMAGES_PER_PRODUCT = 5
 
 /** დეტერმინისტული RNG — ერთი და იგივე seed ყოველთვის ერთსა და იმავე კატალოგს იძლევა */
@@ -24,11 +24,8 @@ const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)]
 const int = (rng, min, max) => min + Math.floor(rng() * (max - min + 1))
 const round = (n, step) => Math.round(n / step) * step
 
-const translit = (s) => s
-  .toLowerCase()
-  .replace(/[ა-ჰ]/g, (c) => 'abgdevzTiklmnopJrstufqRySCcZwWxjh'['აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'.indexOf(c)] || '-')
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '')
+/** ინგლისური სათაურიდან URL-ისთვის ვარგისი slug */
+const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
 function makeProduct(cat, i) {
   const rng = mulberry32(hash(cat.slug) + i * 7919)
@@ -37,12 +34,16 @@ function makeProduct(cat, i) {
   const model = pick(rng, cat.models)
   const serial = int(rng, 2, 99)
 
+  // თითო ფილტრიდან ერთი ოფცია: { value: 'sofa', label: 'დივანი' }
   const attrs = {}
   for (const f of cat.filters) attrs[f.key] = pick(rng, f.options)
 
-  const hasType = cat.filters.some((f) => f.key === 'type')
-  const title = (hasType ? `${attrs.type} ${brand} ${model} ${serial}` : `${brand} ${model} ${serial}`).trim()
-  const slug = translit(title)
+  // სათაური ინგლისურია: ტიპის value + ბრენდი + მოდელი + ნომერი
+  const typeWord = attrs.type ? attrs.type.value.replace(/-/g, ' ') : ''
+  const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1)
+  const title = [typeWord.split(' ').map(cap).join(' '), brand, model, serial]
+    .filter(Boolean).join(' ').trim()
+  const slug = slugify(title)
 
   const [pMin, pMax] = cat.price
   const raw = pMin + Math.pow(rng(), 1.6) * (pMax - pMin)
@@ -61,7 +62,7 @@ function makeProduct(cat, i) {
   const stock = rng() < 0.12 ? 0 : int(rng, 1, 140)
 
   const description =
-    `${title} — ${cat.name.toLowerCase()} ${brand}-ისგან. ` +
+    `${title} — ${cat.name.toLowerCase()}, ${brand}. ` +
     `${Object.entries(specs).slice(0, 3).map(([k, v]) => `${k}: ${v}`).join(', ')}. ` +
     (warrantyMonths > 0 ? `მოყვება ${warrantyMonths}-თვიანი გარანტია. ` : '') +
     `${pick(rng, [
@@ -85,7 +86,7 @@ function makeProduct(cat, i) {
     warrantyMonths,
     images: JSON.stringify(images),
     specs: JSON.stringify(specs),
-    attributes: attrs,
+    attributes: Object.fromEntries(Object.entries(attrs).map(([k, v]) => [k, v.value])),
   }
 }
 

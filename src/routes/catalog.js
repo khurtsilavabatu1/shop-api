@@ -48,15 +48,15 @@ const toProduct = (p) => ({
   createdAt: p.createdAt,
 })
 
-const toCategory = (c) => ({
+/** სიისთვის — მსუბუქი. ფილტრები აქ არ სჭირდება: კატეგორიების გვერდზე ფილტრაცია არ ხდება. */
+const toCategoryCard = (c) => ({
   id: c.id,
   slug: c.slug,
   name: c.name,
   nameEn: c.nameEn,
   description: c.description,
   image: c.image,
-  productsCount: c._count?.products,
-  filters: JSON.parse(c.filters),
+  productsCount: c._count?.products ?? 0,
 })
 
 /* ── GET /api/categories ───────────────────────────────────────────── */
@@ -66,7 +66,7 @@ router.get('/categories', async (_req, res, next) => {
       orderBy: { sortOrder: 'asc' },
       include: { _count: { select: { products: true } } },
     })
-    res.json({ items: cats.map(toCategory) })
+    res.json({ items: cats.map(toCategoryCard) })
   } catch (e) { next(e) }
 })
 
@@ -79,16 +79,31 @@ router.get('/categories/:slug', async (req, res, next) => {
     })
     if (!cat) return res.status(404).json({ message: 'Category not found', code: 'CATEGORY_NOT_FOUND' })
 
-    const [agg, brands] = await Promise.all([
+    const [agg, brandRows] = await Promise.all([
       prisma.product.aggregate({ where: { categoryId: cat.id }, _min: { price: true }, _max: { price: true } }),
       prisma.product.findMany({ where: { categoryId: cat.id }, distinct: ['brand'], select: { brand: true }, orderBy: { brand: 'asc' } }),
     ])
 
-    res.json({
-      ...toCategory(cat),
-      priceRange: { min: agg._min.price ?? 0, max: agg._max.price ?? 0 },
-      brands: brands.map((b) => b.brand),
-    })
+    // ერთი ერთიანი სია — ფრონტი ამ მასივზე გადის და ყველა ფილტრს ერთნაირად ხატავს
+    const filters = [
+      {
+        key: 'brand',
+        label: 'ბრენდი',
+        type: 'checkbox',
+        options: brandRows.map((b) => ({ value: b.brand, label: b.brand })),
+      },
+      {
+        key: 'price',
+        label: 'ფასი',
+        type: 'range',
+        min: Math.floor(agg._min.price ?? 0),
+        max: Math.ceil(agg._max.price ?? 0),
+        unit: '₾',
+      },
+      ...JSON.parse(cat.filters),
+    ]
+
+    res.json({ ...toCategoryCard(cat), filters })
   } catch (e) { next(e) }
 })
 
