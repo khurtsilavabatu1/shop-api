@@ -60,8 +60,7 @@ npm run seed
 | მეთოდი | გზა | აღწერა |
 |---|---|---|
 | `GET` | `/api/categories` | კატეგორიები + ფილტრების განსაზღვრებები |
-| `GET` | `/api/categories/:slug` | ერთი კატეგორია + ფასის დიაპაზონი + ბრენდები |
-| `GET` | `/api/brands` | ბრენდების სია (`?category=`) |
+| `GET` | `/api/categories/:slug` | ერთი კატეგორია + ფილტრების სრული სია (ბრენდი, ფასი, ატრიბუტები) |
 | `GET` | `/api/products` | სია — ფილტრაცია, სორტირება, პაგინაცია, ძებნა |
 | `GET` | `/api/products/:slug` | ერთი პროდუქტი + მსგავსი |
 | `POST` | `/api/auth/register` | რეგისტრაცია → `{ user, accessToken }` |

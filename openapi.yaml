@@ -321,15 +321,6 @@ paths:
         "200": { description: OK }
         "404": { description: კატეგორია არ მოიძებნა }
 
-  /brands:
-    get:
-      tags: [Catalog]
-      summary: ბრენდების სია
-      parameters:
-        - { name: category, in: query, schema: { type: string }, description: "კატეგორიის slug — მხოლოდ ამ კატეგორიის ბრენდები" }
-      responses:
-        "200": { description: OK }
-
   /products:
     get:
       tags: [Catalog]

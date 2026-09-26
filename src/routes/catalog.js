@@ -107,15 +107,6 @@ router.get('/categories/:slug', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-/* ── GET /api/brands ───────────────────────────────────────────────── */
-router.get('/brands', async (req, res, next) => {
-  try {
-    const where = req.query.category ? { category: { slug: String(req.query.category) } } : {}
-    const rows = await prisma.product.findMany({ where, distinct: ['brand'], select: { brand: true }, orderBy: { brand: 'asc' } })
-    res.json({ items: rows.map((r) => r.brand) })
-  } catch (e) { next(e) }
-})
-
 /* ── GET /api/products ─────────────────────────────────────────────── */
 router.get('/products', async (req, res, next) => {
   try {
