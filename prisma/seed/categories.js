@@ -29,6 +29,7 @@ export const categories = [
       { key: 'color', label: 'ფერი', type: 'color', options: [o('black', 'შავი'), o('white', 'თეთრი'), o('blue', 'ლურჯი'), o('green', 'მწვანე'), o('pink', 'ვარდისფერი'), o('gold', 'ოქროსფერი')] },
       { key: 'os', label: 'სისტემა', type: 'radio', options: [o('ios', 'iOS'), o('android', 'Android')] },
     ],
+    imageGroup: (a) => a.os.value, // ios | android
     specs: (rng, a) => ({
       'ეკრანი': `${(5.4 + rng() * 1.6).toFixed(1)}" ${pick(rng, ['OLED', 'AMOLED', 'IPS LCD'])}`,
       'განახლების სიხშირე': pick(rng, ['60Hz', '90Hz', '120Hz', '144Hz']),
@@ -60,6 +61,7 @@ export const categories = [
       { key: 'storage', label: 'დისკი', type: 'checkbox', options: [o('256gb-ssd', '256GB SSD'), o('512gb-ssd', '512GB SSD'), o('1tb-ssd', '1TB SSD'), o('2tb-ssd', '2TB SSD')] },
       { key: 'screen', label: 'ეკრანი', type: 'checkbox', options: [o('13', '13"'), o('14', '14"'), o('15', '15.6"'), o('16', '16"'), o('17', '17"')] },
     ],
+    imageGroup: (a, brand) => (brand === 'Apple' || a.cpu.value === 'apple-m3' ? 'macbook' : 'windows'),
     specs: (rng, a) => ({
       'პროცესორი': a.cpu.label,
       'ოპერატიული მეხსიერება': a.ram.label,

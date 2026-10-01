@@ -1,33 +1,233 @@
 [
  {
-  "file": "products/smartphones/smartphone-1.jpg",
+  "file": "products/smartphones/ios-1.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-iphone13progreen-green-7481400/",
+  "author": "Photoshoot4You"
+ },
+ {
+  "file": "products/smartphones/ios-2.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-apple-phone-telephone-563067/",
+  "author": "kropekk_pl"
+ },
+ {
+  "file": "products/smartphones/ios-3.jpg",
+  "pixabay": "https://pixabay.com/photos/cell-phone-camera-mobile-lens-3274220/",
+  "author": "aixklusiv"
+ },
+ {
+  "file": "products/smartphones/ios-4.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-apple-phone-telephone-563071/",
+  "author": "kropekk_pl"
+ },
+ {
+  "file": "products/smartphones/ios-5.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-6-iphone-iphone6-plus-apple-658844/",
+  "author": "inthesky"
+ },
+ {
+  "file": "products/smartphones/ios-6.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-12-smartphone-pocket-5755362/",
+  "author": "lukgehr"
+ },
+ {
+  "file": "products/smartphones/ios-7.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-apple-phone-telephone-563069/",
+  "author": "kropekk_pl"
+ },
+ {
+  "file": "products/smartphones/ios-8.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-hand-girl-smartphone-500291/",
+  "author": "JESHOOTS-com"
+ },
+ {
+  "file": "products/smartphones/ios-9.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-hand-iphone-phone-7702600/",
+  "author": "F1Digitals"
+ },
+ {
+  "file": "products/smartphones/ios-10.jpg",
+  "pixabay": "https://pixabay.com/photos/flatlay-work-workspace-office-3938877/",
+  "author": "Ylanite"
+ },
+ {
+  "file": "products/smartphones/ios-11.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-photography-forest-hand-5844157/",
+  "author": "fredrikwandem"
+ },
+ {
+  "file": "products/smartphones/ios-12.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-iphone-iphone-6-mockup-hand-490485/",
+  "author": "JESHOOTS-com"
+ },
+ {
+  "file": "products/smartphones/ios-13.jpg",
+  "pixabay": "https://pixabay.com/photos/people-hand-apple-iphone-2562227/",
+  "author": "StockSnap"
+ },
+ {
+  "file": "products/smartphones/ios-14.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-hand-phone-mobile-5339023/",
+  "author": "vickygharat"
+ },
+ {
+  "file": "products/smartphones/ios-15.jpg",
+  "pixabay": "https://pixabay.com/photos/iphone-7-isolated-touch-app-apple-3171205/",
+  "author": "AS_Photography"
+ },
+ {
+  "file": "products/smartphones/ios-16.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-hand-iphone-macro-1844885/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/smartphones/ios-17.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-hand-iphone-macro-1869458/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/smartphones/ios-18.jpg",
+  "pixabay": "https://pixabay.com/photos/girl-smartphone-iphone-1192032/",
+  "author": "janeb13"
+ },
+ {
+  "file": "products/smartphones/ios-19.jpg",
   "pixabay": "https://pixabay.com/photos/iphone-hand-screen-smartphone-apps-410311/",
   "author": "JESHOOTS-com"
  },
  {
-  "file": "products/smartphones/smartphone-2.jpg",
-  "pixabay": "https://pixabay.com/photos/phone-android-apps-world-map-1869510/",
-  "author": "Pexels"
- },
- {
-  "file": "products/smartphones/smartphone-3.jpg",
+  "file": "products/smartphones/ios-20.jpg",
   "pixabay": "https://pixabay.com/photos/iphone-smartphone-apps-apple-inc-410324/",
   "author": "JESHOOTS-com"
  },
  {
-  "file": "products/smartphones/smartphone-4.jpg",
-  "pixabay": "https://pixabay.com/photos/mobile-phone-cellphone-phone-4646854/",
-  "author": "sweetlouise"
- },
- {
-  "file": "products/smartphones/smartphone-5.jpg",
+  "file": "products/smartphones/ios-21.jpg",
   "pixabay": "https://pixabay.com/photos/technology-smartphone-telephone-3353701/",
   "author": "Erik_Lucatero"
  },
  {
-  "file": "products/smartphones/smartphone-6.jpg",
+  "file": "products/smartphones/ios-22.jpg",
   "pixabay": "https://pixabay.com/photos/smartphone-whatsapp-app-phone-5064084/",
   "author": "antonbe"
+ },
+ {
+  "file": "products/smartphones/android-1.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-mobile-phone-7063769/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-2.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-mobile-phone-7063771/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-3.jpg",
+  "pixabay": "https://pixabay.com/photos/samsung-galaxy-mobile-smartphone-1120727/",
+  "author": "philippzurawski"
+ },
+ {
+  "file": "products/smartphones/android-4.jpg",
+  "pixabay": "https://pixabay.com/photos/android-samsung-samsung-galaxy-1814556/",
+  "author": "krapalm"
+ },
+ {
+  "file": "products/smartphones/android-5.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-mobile-phone-7063770/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-6.jpg",
+  "pixabay": "https://pixabay.com/photos/samsung-galaxy-s10-phone-4721543/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-7.jpg",
+  "pixabay": "https://pixabay.com/photos/andriod-phone-edge-plus-mobile-phone-1844848/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/smartphones/android-8.jpg",
+  "pixabay": "https://pixabay.com/photos/samsung-galaxy-note3-phone-classic-4721546/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-9.jpg",
+  "pixabay": "https://pixabay.com/photos/samsung-galaxy-note8-phone-4728704/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-10.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-samsung-galaxy-s4-mini-325484/",
+  "author": "Simon"
+ },
+ {
+  "file": "products/smartphones/android-11.jpg",
+  "pixabay": "https://pixabay.com/photos/android-mobile-smartphone-1814580/",
+  "author": "krapalm"
+ },
+ {
+  "file": "products/smartphones/android-12.jpg",
+  "pixabay": "https://pixabay.com/photos/samsung-smartphone-phone-technology-5188631/",
+  "author": "dominickvietor"
+ },
+ {
+  "file": "products/smartphones/android-13.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-mobile-phone-7063761/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-14.jpg",
+  "pixabay": "https://pixabay.com/photos/samsung-galaxy-s10-phone-4721539/",
+  "author": "adrian2019"
+ },
+ {
+  "file": "products/smartphones/android-15.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-samsung-galaxy-s4-mini-325479/",
+  "author": "Simon"
+ },
+ {
+  "file": "products/smartphones/android-16.jpg",
+  "pixabay": "https://pixabay.com/photos/galaxy-s8-samsung-android-mobile-2402805/",
+  "author": "krapalm"
+ },
+ {
+  "file": "products/smartphones/android-17.jpg",
+  "pixabay": "https://pixabay.com/photos/mobile-phone-earphone-desktop-5270167/",
+  "author": "WilliamZac"
+ },
+ {
+  "file": "products/smartphones/android-18.jpg",
+  "pixabay": "https://pixabay.com/photos/mobile-phone-android-appar-phone-1572901/",
+  "author": "TheDigitalWay"
+ },
+ {
+  "file": "products/smartphones/android-19.jpg",
+  "pixabay": "https://pixabay.com/photos/telephone-mobility-cell-phone-380008/",
+  "author": "wilkernet"
+ },
+ {
+  "file": "products/smartphones/android-20.jpg",
+  "pixabay": "https://pixabay.com/photos/mobile-phone-cell-cell-phone-1726138/",
+  "author": "qimono"
+ },
+ {
+  "file": "products/smartphones/android-21.jpg",
+  "pixabay": "https://pixabay.com/photos/mobile-pixel-android-google-phone-4710790/",
+  "author": "Dele_o"
+ },
+ {
+  "file": "products/smartphones/android-22.jpg",
+  "pixabay": "https://pixabay.com/photos/smartphone-mobile-phone-cell-phone-564152/",
+  "author": "Edar"
+ },
+ {
+  "file": "products/smartphones/android-23.jpg",
+  "pixabay": "https://pixabay.com/photos/phone-android-apps-world-map-1869510/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/smartphones/android-24.jpg",
+  "pixabay": "https://pixabay.com/photos/mobile-phone-cellphone-phone-4646854/",
+  "author": "sweetlouise"
  },
  {
   "file": "categories/smartphones.jpg",
@@ -35,34 +235,174 @@
   "author": "stevepb"
  },
  {
-  "file": "products/laptops/laptop-1.jpg",
-  "pixabay": "https://pixabay.com/photos/coffee-caffeine-beverage-table-2425303/",
-  "author": "Engin_Akyurt"
+  "file": "products/laptops/macbook-1.jpg",
+  "pixabay": "https://pixabay.com/photos/workplace-macbook-computer-digital-4155023/",
+  "author": "ptra"
  },
  {
-  "file": "products/laptops/laptop-2.jpg",
+  "file": "products/laptops/macbook-2.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-hands-gadgets-iphone-apple-1842297/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/macbook-3.jpg",
+  "pixabay": "https://pixabay.com/photos/coffee-cup-macbook-laptop-working-1284041/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/macbook-4.jpg",
+  "pixabay": "https://pixabay.com/photos/office-desk-business-working-925806/",
+  "author": "StockSnap"
+ },
+ {
+  "file": "products/laptops/macbook-5.jpg",
+  "pixabay": "https://pixabay.com/photos/notebook-typing-coffee-computer-1850613/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/macbook-6.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-notebook-business-charts-1836990/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/macbook-7.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-apple-macbook-computer-2562361/",
+  "author": "StockSnap"
+ },
+ {
+  "file": "products/laptops/macbook-8.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-imac-macbook-pro-portable-3144234/",
+  "author": "HeikoAL"
+ },
+ {
+  "file": "products/laptops/macbook-9.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-imac-macbook-pro-portable-3144237/",
+  "author": "HeikoAL"
+ },
+ {
+  "file": "products/laptops/macbook-10.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-imac-macbook-pro-portable-3144235/",
+  "author": "HeikoAL"
+ },
+ {
+  "file": "products/laptops/macbook-11.jpg",
+  "pixabay": "https://pixabay.com/photos/macbook-pro-adapter-usb-c-macbook-2381729/",
+  "author": "LYRL"
+ },
+ {
+  "file": "products/laptops/macbook-12.jpg",
+  "pixabay": "https://pixabay.com/photos/freelance-laptop-google-macbook-6051356/",
+  "author": "Firmbee"
+ },
+ {
+  "file": "products/laptops/macbook-13.jpg",
+  "pixabay": "https://pixabay.com/photos/macbook-macbook-pro-computer-4405976/",
+  "author": "ninosouza"
+ },
+ {
+  "file": "products/laptops/macbook-14.jpg",
   "pixabay": "https://pixabay.com/photos/macbook-laptop-google-display-459196/",
   "author": "377053"
  },
  {
-  "file": "products/laptops/laptop-3.jpg",
-  "pixabay": "https://pixabay.com/photos/apple-smartphone-desk-laptop-1282241/",
-  "author": "Pexels"
- },
- {
-  "file": "products/laptops/laptop-4.jpg",
+  "file": "products/laptops/macbook-15.jpg",
   "pixabay": "https://pixabay.com/photos/laptop-coffee-arm-desktop-notebook-1205256/",
   "author": "27707"
  },
  {
-  "file": "products/laptops/laptop-5.jpg",
+  "file": "products/laptops/macbook-16.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-macbook-notebook-computer-1853259/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/windows-1.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-work-coffee-chart-man-6062423/",
+  "author": "Firmbee"
+ },
+ {
+  "file": "products/laptops/windows-2.jpg",
+  "pixabay": "https://pixabay.com/photos/beard-business-business-people-cafe-2326422/",
+  "author": "rawpixel"
+ },
+ {
+  "file": "products/laptops/windows-3.jpg",
+  "pixabay": "https://pixabay.com/photos/work-space-home-office-office-space-232985/",
+  "author": "inkflo"
+ },
+ {
+  "file": "products/laptops/windows-4.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-code-programming-computer-2557466/",
+  "author": "StockSnap"
+ },
+ {
+  "file": "products/laptops/windows-5.jpg",
+  "pixabay": "https://pixabay.com/photos/interior-modern-home-room-desk-10492658/",
+  "author": "ehabk"
+ },
+ {
+  "file": "products/laptops/windows-6.jpg",
+  "pixabay": "https://pixabay.com/photos/macbook-laptop-computer-technology-923128/",
+  "author": "StockSnap"
+ },
+ {
+  "file": "products/laptops/windows-7.jpg",
+  "pixabay": "https://pixabay.com/photos/people-man-guy-beard-laptop-2605980/",
+  "author": "StockSnap"
+ },
+ {
+  "file": "products/laptops/windows-8.jpg",
+  "pixabay": "https://pixabay.com/photos/startup-start-up-notebooks-creative-593329/",
+  "author": "StartupStockPhotos"
+ },
+ {
+  "file": "products/laptops/windows-9.jpg",
+  "pixabay": "https://pixabay.com/photos/student-typing-keyboard-text-woman-849823/",
+  "author": "StartupStockPhotos"
+ },
+ {
+  "file": "products/laptops/windows-10.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-workstaion-office-work-4906312/",
+  "author": "Deeezy"
+ },
+ {
+  "file": "products/laptops/windows-11.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-digital-device-technology-5673901/",
+  "author": "JoshuaWoroniecki"
+ },
+ {
+  "file": "products/laptops/windows-12.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-notebook-cellphone-computer-1839876/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/windows-13.jpg",
+  "pixabay": "https://pixabay.com/photos/laptop-grass-acer-digital-762548/",
+  "author": "kaboompics"
+ },
+ {
+  "file": "products/laptops/windows-14.jpg",
+  "pixabay": "https://pixabay.com/photos/computer-macbook-tablet-editing-767781/",
+  "author": "Lalmch"
+ },
+ {
+  "file": "products/laptops/windows-15.jpg",
+  "pixabay": "https://pixabay.com/photos/coffee-caffeine-beverage-table-2425303/",
+  "author": "Engin_Akyurt"
+ },
+ {
+  "file": "products/laptops/windows-16.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-smartphone-desk-laptop-1282241/",
+  "author": "Pexels"
+ },
+ {
+  "file": "products/laptops/windows-17.jpg",
   "pixabay": "https://pixabay.com/photos/laptop-wordpress-wordpress-design-593673/",
   "author": "27707"
  },
  {
-  "file": "products/laptops/laptop-6.jpg",
-  "pixabay": "https://pixabay.com/photos/apple-macbook-notebook-computer-1853259/",
-  "author": "Pexels"
+  "file": "products/laptops/windows-18.jpg",
+  "pixabay": "https://pixabay.com/photos/home-office-notebook-home-couch-569153/",
+  "author": "Life-Of-Pix"
  },
  {
   "file": "categories/laptops.jpg",
@@ -600,6 +940,11 @@
   "author": "thekgpgroup"
  },
  {
+  "file": "products/sports/expander-4.jpg",
+  "pixabay": "https://pixabay.com/photos/elastic-band-hand-symptom-5464608/",
+  "author": "Septimiu"
+ },
+ {
   "file": "products/sports/bench-1.jpg",
   "pixabay": "https://pixabay.com/photos/man-training-dumbbells-3502830/",
   "author": "3841851"
@@ -618,6 +963,21 @@
   "file": "products/sports/bench-4.jpg",
   "pixabay": "https://pixabay.com/photos/woman-fitness-girl-beauty-5140656/",
   "author": "andrey_braynsk"
+ },
+ {
+  "file": "products/sports/bench-5.jpg",
+  "pixabay": "https://pixabay.com/photos/fitness-center-exercises-sport-1259300/",
+  "author": "Arcaion"
+ },
+ {
+  "file": "products/sports/bench-6.jpg",
+  "pixabay": "https://pixabay.com/photos/man-bench-press-weight-weights-81725/",
+  "author": "12019"
+ },
+ {
+  "file": "products/sports/bench-7.jpg",
+  "pixabay": "https://pixabay.com/photos/woman-personal-trainer-fitness-2260736/",
+  "author": "5132824"
  },
  {
   "file": "categories/sports.jpg",
@@ -848,6 +1208,141 @@
   "file": "products/books/book-8.jpg",
   "pixabay": "https://pixabay.com/photos/book-synthesizer-keys-melody-7767900/",
   "author": "RuslanSikunov"
+ },
+ {
+  "file": "products/books/book-9.jpg",
+  "pixabay": "https://pixabay.com/photos/music-book-old-literature-hymnal-3510326/",
+  "author": "Tama66"
+ },
+ {
+  "file": "products/books/book-10.jpg",
+  "pixabay": "https://pixabay.com/photos/books-library-jrr-tolkien-1246674/",
+  "author": "AnnieSpratt"
+ },
+ {
+  "file": "products/books/book-11.jpg",
+  "pixabay": "https://pixabay.com/photos/stack-of-books-vintage-books-book-1001655/",
+  "author": "JillWellington"
+ },
+ {
+  "file": "products/books/book-12.jpg",
+  "pixabay": "https://pixabay.com/photos/books-book-reading-packaging-1862768/",
+  "author": "Andrew-Art"
+ },
+ {
+  "file": "products/books/book-13.jpg",
+  "pixabay": "https://pixabay.com/photos/book-flowers-purple-book-5850392/",
+  "author": "RuslanSikunov"
+ },
+ {
+  "file": "products/books/book-14.jpg",
+  "pixabay": "https://pixabay.com/photos/book-book-cover-paper-boat-4970114/",
+  "author": "mila160776"
+ },
+ {
+  "file": "products/books/book-15.jpg",
+  "pixabay": "https://pixabay.com/photos/a-book-old-old-book-pitched-2172224/",
+  "author": "ulleo"
+ },
+ {
+  "file": "products/books/book-16.jpg",
+  "pixabay": "https://pixabay.com/photos/a-book-book-volumes-books-4701375/",
+  "author": "moritz320"
+ },
+ {
+  "file": "products/books/book-17.jpg",
+  "pixabay": "https://pixabay.com/photos/book-stack-stack-literature-3128122/",
+  "author": "HeikoAL"
+ },
+ {
+  "file": "products/books/book-18.jpg",
+  "pixabay": "https://pixabay.com/photos/a-book-pitched-book-pages-paper-1738609/",
+  "author": "Alexas_Fotos"
+ },
+ {
+  "file": "products/books/book-19.jpg",
+  "pixabay": "https://pixabay.com/photos/books-stack-book-stack-used-books-2630076/",
+  "author": "flockine"
+ },
+ {
+  "file": "products/books/book-20.jpg",
+  "pixabay": "https://pixabay.com/photos/bible-hymn-book-old-church-books-3811442/",
+  "author": "guvo59"
+ },
+ {
+  "file": "products/books/book-21.jpg",
+  "pixabay": "https://pixabay.com/photos/a-book-book-pages-book-cover-1281236/",
+  "author": "cocoparisienne"
+ },
+ {
+  "file": "products/books/book-22.jpg",
+  "pixabay": "https://pixabay.com/photos/books-read-garden-sun-bride-apple-1757734/",
+  "author": "congerdesign"
+ },
+ {
+  "file": "products/books/book-23.jpg",
+  "pixabay": "https://pixabay.com/photos/apple-books-still-life-fruit-food-256261/",
+  "author": "jarmoluk"
+ },
+ {
+  "file": "products/books/book-24.jpg",
+  "pixabay": "https://pixabay.com/photos/book-stack-learn-knowledge-library-168824/",
+  "author": "Rousseau"
+ },
+ {
+  "file": "products/books/book-25.jpg",
+  "pixabay": "https://pixabay.com/photos/books-book-stack-time-read-3786559/",
+  "author": "9883074"
+ },
+ {
+  "file": "products/books/book-26.jpg",
+  "pixabay": "https://pixabay.com/photos/books-stack-book-stack-literature-1943625/",
+  "author": "ulleo"
+ },
+ {
+  "file": "products/books/book-27.jpg",
+  "pixabay": "https://pixabay.com/photos/book-stack-books-antiquariat-read-2915944/",
+  "author": "ulleo"
+ },
+ {
+  "file": "products/books/book-28.jpg",
+  "pixabay": "https://pixabay.com/photos/book-stack-stack-literature-3128123/",
+  "author": "HeikoAL"
+ },
+ {
+  "file": "products/books/book-29.jpg",
+  "pixabay": "https://pixabay.com/photos/book-stack-stack-literature-3128125/",
+  "author": "HeikoAL"
+ },
+ {
+  "file": "products/books/book-30.jpg",
+  "pixabay": "https://pixabay.com/photos/book-stack-library-reading-room-2852903/",
+  "author": "wytrazek"
+ },
+ {
+  "file": "products/books/book-31.jpg",
+  "pixabay": "https://pixabay.com/photos/library-literature-a-book-wisdom-3185061/",
+  "author": "Woman1907"
+ },
+ {
+  "file": "products/books/book-32.jpg",
+  "pixabay": "https://pixabay.com/photos/literature-library-knowledge-3091212/",
+  "author": "Ylanite"
+ },
+ {
+  "file": "products/books/book-33.jpg",
+  "pixabay": "https://pixabay.com/photos/a-book-read-book-pages-pitched-3964038/",
+  "author": "congerdesign"
+ },
+ {
+  "file": "products/books/book-34.jpg",
+  "pixabay": "https://pixabay.com/photos/books-read-knowledge-literature-4305459/",
+  "author": "4262159"
+ },
+ {
+  "file": "products/books/book-35.jpg",
+  "pixabay": "https://pixabay.com/photos/christmas-background-books-education-1850645/",
+  "author": "Pexels"
  },
  {
   "file": "categories/books.jpg",
@@ -1471,23 +1966,43 @@
  },
  {
   "file": "products/auto/dashcam-1.jpg",
+  "pixabay": "https://pixabay.com/photos/gopro-camera-photo-taking-photos-630232/",
+  "author": "NilsVomKiez"
+ },
+ {
+  "file": "products/auto/dashcam-2.jpg",
+  "pixabay": "https://pixabay.com/photos/gopro-hero-camera-photography-5128732/",
+  "author": "Vijaypendyam"
+ },
+ {
+  "file": "products/auto/dashcam-3.jpg",
+  "pixabay": "https://pixabay.com/photos/gopro-camera-video-technology-1442895/",
+  "author": "xyz0"
+ },
+ {
+  "file": "products/auto/dashcam-4.jpg",
+  "pixabay": "https://pixabay.com/photos/action-cam-action-cam-action-cam-3281315/",
+  "author": "2427999"
+ },
+ {
+  "file": "products/auto/dashcam-5.jpg",
+  "pixabay": "https://pixabay.com/photos/driving-friends-roadtrip-car-2681097/",
+  "author": "Bertsz"
+ },
+ {
+  "file": "products/auto/dashcam-6.jpg",
+  "pixabay": "https://pixabay.com/photos/driving-car-road-winter-speed-916405/",
+  "author": "fancycrave1"
+ },
+ {
+  "file": "products/auto/dashcam-7.jpg",
   "pixabay": "https://pixabay.com/photos/action-cam-mini-camera-camera-1610321/",
   "author": "Harald_Landsrath"
  },
  {
-  "file": "products/auto/dashcam-2.jpg",
+  "file": "products/auto/dashcam-8.jpg",
   "pixabay": "https://pixabay.com/photos/road-driving-dash-windshield-signs-2625605/",
   "author": "StockSnap"
- },
- {
-  "file": "products/auto/dashcam-3.jpg",
-  "pixabay": "https://pixabay.com/photos/eclipse-space-vw-spaceman-earth-2666378/",
-  "author": "Graehawk"
- },
- {
-  "file": "products/auto/dashcam-4.jpg",
-  "pixabay": "https://pixabay.com/photos/automobile-race-car-vehicle-961702/",
-  "author": "lumpi"
  },
  {
   "file": "products/auto/seat-cover-1.jpg",
@@ -1568,6 +2083,16 @@
   "file": "products/auto/compressor-5.jpg",
   "pixabay": "https://pixabay.com/photos/valve-cap-valve-air-air-pressure-58721/",
   "author": "Hans"
+ },
+ {
+  "file": "products/auto/compressor-6.jpg",
+  "pixabay": "https://pixabay.com/photos/pressure-gauge-oxygen-industry-3118811/",
+  "author": "fernandozhiminaicela"
+ },
+ {
+  "file": "products/auto/compressor-7.jpg",
+  "pixabay": "https://pixabay.com/photos/winter-tires-tire-service-automobile-2861853/",
+  "author": "HutchRock"
  },
  {
   "file": "products/auto/bulb-1.jpg",

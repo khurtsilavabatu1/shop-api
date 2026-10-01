@@ -2,26 +2,98 @@
   "smartphones": {
     "banner": "categories/smartphones.jpg",
     "types": {
-      "smartphone": [
-        "products/smartphones/smartphone-1.jpg",
-        "products/smartphones/smartphone-2.jpg",
-        "products/smartphones/smartphone-3.jpg",
-        "products/smartphones/smartphone-4.jpg",
-        "products/smartphones/smartphone-5.jpg",
-        "products/smartphones/smartphone-6.jpg"
+      "ios": [
+        "products/smartphones/ios-1.jpg",
+        "products/smartphones/ios-2.jpg",
+        "products/smartphones/ios-3.jpg",
+        "products/smartphones/ios-4.jpg",
+        "products/smartphones/ios-5.jpg",
+        "products/smartphones/ios-6.jpg",
+        "products/smartphones/ios-7.jpg",
+        "products/smartphones/ios-8.jpg",
+        "products/smartphones/ios-9.jpg",
+        "products/smartphones/ios-10.jpg",
+        "products/smartphones/ios-11.jpg",
+        "products/smartphones/ios-12.jpg",
+        "products/smartphones/ios-13.jpg",
+        "products/smartphones/ios-14.jpg",
+        "products/smartphones/ios-15.jpg",
+        "products/smartphones/ios-16.jpg",
+        "products/smartphones/ios-17.jpg",
+        "products/smartphones/ios-18.jpg",
+        "products/smartphones/ios-19.jpg",
+        "products/smartphones/ios-20.jpg",
+        "products/smartphones/ios-21.jpg",
+        "products/smartphones/ios-22.jpg"
+      ],
+      "android": [
+        "products/smartphones/android-1.jpg",
+        "products/smartphones/android-2.jpg",
+        "products/smartphones/android-3.jpg",
+        "products/smartphones/android-4.jpg",
+        "products/smartphones/android-5.jpg",
+        "products/smartphones/android-6.jpg",
+        "products/smartphones/android-7.jpg",
+        "products/smartphones/android-8.jpg",
+        "products/smartphones/android-9.jpg",
+        "products/smartphones/android-10.jpg",
+        "products/smartphones/android-11.jpg",
+        "products/smartphones/android-12.jpg",
+        "products/smartphones/android-13.jpg",
+        "products/smartphones/android-14.jpg",
+        "products/smartphones/android-15.jpg",
+        "products/smartphones/android-16.jpg",
+        "products/smartphones/android-17.jpg",
+        "products/smartphones/android-18.jpg",
+        "products/smartphones/android-19.jpg",
+        "products/smartphones/android-20.jpg",
+        "products/smartphones/android-21.jpg",
+        "products/smartphones/android-22.jpg",
+        "products/smartphones/android-23.jpg",
+        "products/smartphones/android-24.jpg"
       ]
     }
   },
   "laptops": {
     "banner": "categories/laptops.jpg",
     "types": {
-      "laptop": [
-        "products/laptops/laptop-1.jpg",
-        "products/laptops/laptop-2.jpg",
-        "products/laptops/laptop-3.jpg",
-        "products/laptops/laptop-4.jpg",
-        "products/laptops/laptop-5.jpg",
-        "products/laptops/laptop-6.jpg"
+      "macbook": [
+        "products/laptops/macbook-1.jpg",
+        "products/laptops/macbook-2.jpg",
+        "products/laptops/macbook-3.jpg",
+        "products/laptops/macbook-4.jpg",
+        "products/laptops/macbook-5.jpg",
+        "products/laptops/macbook-6.jpg",
+        "products/laptops/macbook-7.jpg",
+        "products/laptops/macbook-8.jpg",
+        "products/laptops/macbook-9.jpg",
+        "products/laptops/macbook-10.jpg",
+        "products/laptops/macbook-11.jpg",
+        "products/laptops/macbook-12.jpg",
+        "products/laptops/macbook-13.jpg",
+        "products/laptops/macbook-14.jpg",
+        "products/laptops/macbook-15.jpg",
+        "products/laptops/macbook-16.jpg"
+      ],
+      "windows": [
+        "products/laptops/windows-1.jpg",
+        "products/laptops/windows-2.jpg",
+        "products/laptops/windows-3.jpg",
+        "products/laptops/windows-4.jpg",
+        "products/laptops/windows-5.jpg",
+        "products/laptops/windows-6.jpg",
+        "products/laptops/windows-7.jpg",
+        "products/laptops/windows-8.jpg",
+        "products/laptops/windows-9.jpg",
+        "products/laptops/windows-10.jpg",
+        "products/laptops/windows-11.jpg",
+        "products/laptops/windows-12.jpg",
+        "products/laptops/windows-13.jpg",
+        "products/laptops/windows-14.jpg",
+        "products/laptops/windows-15.jpg",
+        "products/laptops/windows-16.jpg",
+        "products/laptops/windows-17.jpg",
+        "products/laptops/windows-18.jpg"
       ]
     }
   },
@@ -176,13 +248,17 @@
       "expander": [
         "products/sports/expander-1.jpg",
         "products/sports/expander-2.jpg",
-        "products/sports/expander-3.jpg"
+        "products/sports/expander-3.jpg",
+        "products/sports/expander-4.jpg"
       ],
       "bench": [
         "products/sports/bench-1.jpg",
         "products/sports/bench-2.jpg",
         "products/sports/bench-3.jpg",
-        "products/sports/bench-4.jpg"
+        "products/sports/bench-4.jpg",
+        "products/sports/bench-5.jpg",
+        "products/sports/bench-6.jpg",
+        "products/sports/bench-7.jpg"
       ]
     }
   },
@@ -250,7 +326,34 @@
         "products/books/book-5.jpg",
         "products/books/book-6.jpg",
         "products/books/book-7.jpg",
-        "products/books/book-8.jpg"
+        "products/books/book-8.jpg",
+        "products/books/book-9.jpg",
+        "products/books/book-10.jpg",
+        "products/books/book-11.jpg",
+        "products/books/book-12.jpg",
+        "products/books/book-13.jpg",
+        "products/books/book-14.jpg",
+        "products/books/book-15.jpg",
+        "products/books/book-16.jpg",
+        "products/books/book-17.jpg",
+        "products/books/book-18.jpg",
+        "products/books/book-19.jpg",
+        "products/books/book-20.jpg",
+        "products/books/book-21.jpg",
+        "products/books/book-22.jpg",
+        "products/books/book-23.jpg",
+        "products/books/book-24.jpg",
+        "products/books/book-25.jpg",
+        "products/books/book-26.jpg",
+        "products/books/book-27.jpg",
+        "products/books/book-28.jpg",
+        "products/books/book-29.jpg",
+        "products/books/book-30.jpg",
+        "products/books/book-31.jpg",
+        "products/books/book-32.jpg",
+        "products/books/book-33.jpg",
+        "products/books/book-34.jpg",
+        "products/books/book-35.jpg"
       ]
     }
   },
@@ -436,7 +539,11 @@
         "products/auto/dashcam-1.jpg",
         "products/auto/dashcam-2.jpg",
         "products/auto/dashcam-3.jpg",
-        "products/auto/dashcam-4.jpg"
+        "products/auto/dashcam-4.jpg",
+        "products/auto/dashcam-5.jpg",
+        "products/auto/dashcam-6.jpg",
+        "products/auto/dashcam-7.jpg",
+        "products/auto/dashcam-8.jpg"
       ],
       "seat-cover": [
         "products/auto/seat-cover-1.jpg",
@@ -458,7 +565,9 @@
         "products/auto/compressor-2.jpg",
         "products/auto/compressor-3.jpg",
         "products/auto/compressor-4.jpg",
-        "products/auto/compressor-5.jpg"
+        "products/auto/compressor-5.jpg",
+        "products/auto/compressor-6.jpg",
+        "products/auto/compressor-7.jpg"
       ],
       "bulb": [
         "products/auto/bulb-1.jpg",

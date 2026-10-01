@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 
 const PRODUCTS_PER_CATEGORY = 40
 /** კატალოგის ვერსია — გაზრდისას პროდაქშენი ავტომატურად გადააგენერირებს */
-export const CATALOG_VERSION = '4'
+export const CATALOG_VERSION = '5'
 const IMAGES_PER_PRODUCT = 5
 
 /**
@@ -40,7 +40,7 @@ const round = (n, step) => Math.round(n / step) * step
 /** ინგლისური სათაურიდან URL-ისთვის ვარგისი slug */
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
-function makeProduct(cat, i) {
+function makeProduct(cat, i, nextIndex) {
   const rng = mulberry32(hash(cat.slug) + i * 7919)
 
   const brand = pick(rng, cat.brands)
@@ -69,13 +69,6 @@ function makeProduct(cat, i) {
   const warrantyMonths = pick(rng, cat.warranty)
   if (warrantyMonths > 0) specs['გარანტია'] = `${warrantyMonths} თვე`
 
-  // ტიპის ფოტოები (დივანს — დივნის); ტიპის ფილტრის გარეშე კატეგორიას ერთი საერთო ნაკრები აქვს.
-  // რიგითობა i-ით იძვრის, რომ ერთი ტიპის პროდუქტებს სხვადასხვა მთავარი ფოტო ჰქონდეთ.
-  const types = IMAGES[cat.slug].types
-  const pool = attrs.type ? types[attrs.type.value] : Object.values(types)[0]
-  const images = Array.from({ length: Math.min(IMAGES_PER_PRODUCT, pool.length) }, (_, n) =>
-    imageUrl(pool[(i + n) % pool.length]))
-
   const stock = rng() < 0.12 ? 0 : int(rng, 1, 140)
 
   const description =
@@ -88,6 +81,18 @@ function makeProduct(cat, i) {
       'ორიგინალი პროდუქცია ოფიციალური იმპორტიორისგან.',
       'დაბრუნების შესაძლებლობა 14 დღის განმავლობაში.',
     ])}`
+
+  // ფოტოების ჯგუფი: ტიპი (დივანს — დივნის), ან კატეგორიის imageGroup (iOS → iPhone, Apple → MacBook).
+  // მთავარი ფოტო ჯგუფში რიგრიგობით ნაწილდება, დანარჩენები slug-ით არეულია — ცალკე RNG-ით,
+  // რომ ძირითადი RNG-ის მიმდევრობა (ფასები, მარაგი...) არ შეიცვალოს.
+  const pools = IMAGES[cat.slug].types
+  const group = attrs.type?.value ?? cat.imageGroup?.(attrs, brand) ?? Object.keys(pools)[0]
+  const pool = pools[group]
+  const main = pool[nextIndex(group) % pool.length]
+  const shuffleRng = mulberry32(hash(slug))
+  const rest = pool.filter((f) => f !== main)
+    .map((f) => [shuffleRng(), f]).sort((a, b) => a[0] - b[0]).map(([, f]) => f)
+  const images = [main, ...rest].slice(0, IMAGES_PER_PRODUCT).map(imageUrl)
 
   return {
     slug,
@@ -139,9 +144,15 @@ export async function seedCatalog(prisma, { log = console.log } = {}) {
     const products = []
     const attributes = []
     const usedSlugs = new Map()
+    const imageCursor = new Map()
+    const nextIndex = (group) => {
+      const n = imageCursor.get(group) ?? 0
+      imageCursor.set(group, n + 1)
+      return n
+    }
 
     for (let i = 0; i < PRODUCTS_PER_CATEGORY; i++) {
-      const { attributes: attrs, ...data } = makeProduct(cat, i)
+      const { attributes: attrs, ...data } = makeProduct(cat, i, nextIndex)
 
       // დუბლიკატი slug-ს ემატება რიგითობა — ისევე, როგორც რეალურ CMS-ებში
       const seen = usedSlugs.get(data.slug) ?? 0
