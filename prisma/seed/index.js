@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import fs from 'node:fs'
 import { PrismaClient } from '@prisma/client'
 import { categories } from './categories.js'
 
@@ -6,8 +7,20 @@ const prisma = new PrismaClient()
 
 const PRODUCTS_PER_CATEGORY = 40
 /** კატალოგის ვერსია — გაზრდისას პროდაქშენი ავტომატურად გადააგენერირებს */
-export const CATALOG_VERSION = '3'
+export const CATALOG_VERSION = '4'
 const IMAGES_PER_PRODUCT = 5
+
+/**
+ * სურათები public/images-შია (Pixabay, ხელით შერჩეული — იხ. public/images/CREDITS.json).
+ * images.json: { [კატეგორია]: { banner, types: { [ტიპი]: [ფაილები] } } }
+ */
+const IMAGES = JSON.parse(fs.readFileSync(new URL('./images.json', import.meta.url), 'utf8'))
+
+/** API-ის საჯარო მისამართი — სურათების აბსოლუტური URL-ებისთვის. Render-ზე RENDER_EXTERNAL_URL თავად ისმება. */
+const imageBase = () =>
+  (process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 4000}`)
+    .replace(/\/+$/, '')
+const imageUrl = (file) => `${imageBase()}/images/${file}`
 
 /** დეტერმინისტული RNG — ერთი და იგივე seed ყოველთვის ერთსა და იმავე კატალოგს იძლევა */
 function mulberry32(seed) {
@@ -56,8 +69,12 @@ function makeProduct(cat, i) {
   const warrantyMonths = pick(rng, cat.warranty)
   if (warrantyMonths > 0) specs['გარანტია'] = `${warrantyMonths} თვე`
 
-  const images = Array.from({ length: IMAGES_PER_PRODUCT }, (_, n) =>
-    `https://picsum.photos/seed/${slug}-${n + 1}/900/900`)
+  // ტიპის ფოტოები (დივანს — დივნის); ტიპის ფილტრის გარეშე კატეგორიას ერთი საერთო ნაკრები აქვს.
+  // რიგითობა i-ით იძვრის, რომ ერთი ტიპის პროდუქტებს სხვადასხვა მთავარი ფოტო ჰქონდეთ.
+  const types = IMAGES[cat.slug].types
+  const pool = attrs.type ? types[attrs.type.value] : Object.values(types)[0]
+  const images = Array.from({ length: Math.min(IMAGES_PER_PRODUCT, pool.length) }, (_, n) =>
+    imageUrl(pool[(i + n) % pool.length]))
 
   const stock = rng() < 0.12 ? 0 : int(rng, 1, 140)
 
@@ -104,6 +121,7 @@ export async function seedCatalog(prisma, { log = console.log } = {}) {
   await prisma.category.deleteMany()
 
   let total = 0
+  let images = 0
 
   for (const [index, cat] of categories.entries()) {
     const category = await prisma.category.create({
@@ -112,7 +130,7 @@ export async function seedCatalog(prisma, { log = console.log } = {}) {
         name: cat.name,
         nameEn: cat.nameEn,
         description: cat.description,
-        image: `https://picsum.photos/seed/cat-${cat.slug}/1200/500`,
+        image: imageUrl(IMAGES[cat.slug].banner),
         sortOrder: index,
         filters: JSON.stringify(cat.filters),
       },
@@ -141,11 +159,15 @@ export async function seedCatalog(prisma, { log = console.log } = {}) {
     await prisma.productAttribute.createMany({ data: attributes })
 
     total += products.length
+    images += products.reduce((n, p) => n + JSON.parse(p.images).length, 0)
     log(`  ${cat.name.padEnd(28)} ${products.length} პროდუქტი`)
   }
 
-  return { categories: categories.length, products: total }
+  return { categories: categories.length, products: total, images }
 }
+
+/** ვერსია + სურათების მისამართი: API-ის დომენის შეცვლისას URL-ებიც განახლდება */
+const catalogStamp = () => `${CATALOG_VERSION} ${imageBase()}`
 
 /** ავსებს კატალოგს, თუ ის ცარიელია ან ვერსია შეიცვალა */
 export async function ensureCatalog(prisma) {
@@ -154,19 +176,19 @@ export async function ensureCatalog(prisma) {
     prisma.meta.findUnique({ where: { key: 'catalogVersion' } }).catch(() => null),
   ])
 
-  if (count > 0 && meta?.value === CATALOG_VERSION) {
+  if (count > 0 && meta?.value === catalogStamp()) {
     return { skipped: true, categories: count }
   }
 
   console.log(count === 0
     ? 'კატალოგი ცარიელია — ვავსებ...'
-    : `კატალოგის ვერსია ${meta?.value ?? '?'} → ${CATALOG_VERSION}, გადავაგენერირებ...`)
+    : `კატალოგის ვერსია ${meta?.value ?? '?'} → ${catalogStamp()}, გადავაგენერირებ...`)
 
   const result = await seedCatalog(prisma)
   await prisma.meta.upsert({
     where: { key: 'catalogVersion' },
-    create: { key: 'catalogVersion', value: CATALOG_VERSION },
-    update: { value: CATALOG_VERSION },
+    create: { key: 'catalogVersion', value: catalogStamp() },
+    update: { value: catalogStamp() },
   })
 
   console.log(`✓ ${result.categories} კატეგორია, ${result.products} პროდუქტი`)

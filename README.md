@@ -53,7 +53,13 @@ npm run seed
 ```
 
 გენერაცია **დეტერმინისტულია** — ერთი და იგივე პროდუქტები მიიღება ყოველ ჯერზე.
-სურათები: `picsum.photos`, slug-ზე მიბმული seed-ით.
+სურათები: ხელით შერჩეული ფოტოები [Pixabay](https://pixabay.com)-დან (Pixabay Content License),
+თითო პროდუქტის ტიპზე 3–8 ფოტო — დივანს დივნის ფოტო აქვს, მაცივარს მაცივრის.
+ფაილები `public/images/`-შია და API თავად აწვდის `/images/...` მისამართზე;
+ტიპი → ფაილები რუკა `prisma/seed/images.json`-შია, ავტორები `public/images/CREDITS.json`-ში.
+
+სურათების აბსოლუტური URL-ები seed-ისას იწყობა `PUBLIC_URL`-დან
+(Render-ზე თავად აიღება `RENDER_EXTERNAL_URL`, ლოკალურად `http://localhost:PORT`).
 
 ## ენდპოინტები
 

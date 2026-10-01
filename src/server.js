@@ -19,6 +19,11 @@ const PORT = process.env.PORT || 4000
 const origins = (process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean)
 app.use(cors({ origin: origins.length ? origins : true }))
 app.use(express.json())
+
+// პროდუქტების სურათები — latency-მდე, რომ ხელოვნური დაყოვნება მათზე არ მოქმედებდეს
+const imagesDir = new URL('../public/images', import.meta.url).pathname
+app.use('/images', express.static(imagesDir, { maxAge: '7d' }))
+
 app.use(latency)
 
 const specPath = new URL('../openapi.yaml', import.meta.url)

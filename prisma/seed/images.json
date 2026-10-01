@@ -1,0 +1,532 @@
+{
+  "smartphones": {
+    "banner": "categories/smartphones.jpg",
+    "types": {
+      "smartphone": [
+        "products/smartphones/smartphone-1.jpg",
+        "products/smartphones/smartphone-2.jpg",
+        "products/smartphones/smartphone-3.jpg",
+        "products/smartphones/smartphone-4.jpg",
+        "products/smartphones/smartphone-5.jpg",
+        "products/smartphones/smartphone-6.jpg"
+      ]
+    }
+  },
+  "laptops": {
+    "banner": "categories/laptops.jpg",
+    "types": {
+      "laptop": [
+        "products/laptops/laptop-1.jpg",
+        "products/laptops/laptop-2.jpg",
+        "products/laptops/laptop-3.jpg",
+        "products/laptops/laptop-4.jpg",
+        "products/laptops/laptop-5.jpg",
+        "products/laptops/laptop-6.jpg"
+      ]
+    }
+  },
+  "home-appliances": {
+    "banner": "categories/home-appliances.jpg",
+    "types": {
+      "fridge": [
+        "products/home-appliances/fridge-1.jpg",
+        "products/home-appliances/fridge-2.jpg",
+        "products/home-appliances/fridge-3.jpg",
+        "products/home-appliances/fridge-4.jpg",
+        "products/home-appliances/fridge-5.jpg",
+        "products/home-appliances/fridge-6.jpg"
+      ],
+      "washer": [
+        "products/home-appliances/washer-1.jpg",
+        "products/home-appliances/washer-2.jpg",
+        "products/home-appliances/washer-3.jpg",
+        "products/home-appliances/washer-4.jpg",
+        "products/home-appliances/washer-5.jpg",
+        "products/home-appliances/washer-6.jpg"
+      ],
+      "dishwasher": [
+        "products/home-appliances/dishwasher-1.jpg",
+        "products/home-appliances/dishwasher-2.jpg",
+        "products/home-appliances/dishwasher-3.jpg",
+        "products/home-appliances/dishwasher-4.jpg",
+        "products/home-appliances/dishwasher-5.jpg",
+        "products/home-appliances/dishwasher-6.jpg"
+      ],
+      "oven": [
+        "products/home-appliances/oven-1.jpg",
+        "products/home-appliances/oven-2.jpg",
+        "products/home-appliances/oven-3.jpg",
+        "products/home-appliances/oven-4.jpg",
+        "products/home-appliances/oven-5.jpg",
+        "products/home-appliances/oven-6.jpg"
+      ],
+      "microwave": [
+        "products/home-appliances/microwave-1.jpg",
+        "products/home-appliances/microwave-2.jpg",
+        "products/home-appliances/microwave-3.jpg",
+        "products/home-appliances/microwave-4.jpg",
+        "products/home-appliances/microwave-5.jpg"
+      ],
+      "hood": [
+        "products/home-appliances/hood-1.jpg",
+        "products/home-appliances/hood-2.jpg",
+        "products/home-appliances/hood-3.jpg",
+        "products/home-appliances/hood-4.jpg",
+        "products/home-appliances/hood-5.jpg",
+        "products/home-appliances/hood-6.jpg"
+      ]
+    }
+  },
+  "furniture": {
+    "banner": "categories/furniture.jpg",
+    "types": {
+      "sofa": [
+        "products/furniture/sofa-1.jpg",
+        "products/furniture/sofa-2.jpg",
+        "products/furniture/sofa-3.jpg",
+        "products/furniture/sofa-4.jpg",
+        "products/furniture/sofa-5.jpg",
+        "products/furniture/sofa-6.jpg"
+      ],
+      "armchair": [
+        "products/furniture/armchair-1.jpg",
+        "products/furniture/armchair-2.jpg",
+        "products/furniture/armchair-3.jpg",
+        "products/furniture/armchair-4.jpg",
+        "products/furniture/armchair-5.jpg",
+        "products/furniture/armchair-6.jpg"
+      ],
+      "table": [
+        "products/furniture/table-1.jpg",
+        "products/furniture/table-2.jpg",
+        "products/furniture/table-3.jpg",
+        "products/furniture/table-4.jpg",
+        "products/furniture/table-5.jpg",
+        "products/furniture/table-6.jpg"
+      ],
+      "chair": [
+        "products/furniture/chair-1.jpg",
+        "products/furniture/chair-2.jpg",
+        "products/furniture/chair-3.jpg",
+        "products/furniture/chair-4.jpg",
+        "products/furniture/chair-5.jpg",
+        "products/furniture/chair-6.jpg"
+      ],
+      "wardrobe": [
+        "products/furniture/wardrobe-1.jpg",
+        "products/furniture/wardrobe-2.jpg",
+        "products/furniture/wardrobe-3.jpg",
+        "products/furniture/wardrobe-4.jpg",
+        "products/furniture/wardrobe-5.jpg",
+        "products/furniture/wardrobe-6.jpg"
+      ],
+      "bed": [
+        "products/furniture/bed-1.jpg",
+        "products/furniture/bed-2.jpg",
+        "products/furniture/bed-3.jpg",
+        "products/furniture/bed-4.jpg",
+        "products/furniture/bed-5.jpg",
+        "products/furniture/bed-6.jpg"
+      ],
+      "shelf": [
+        "products/furniture/shelf-1.jpg",
+        "products/furniture/shelf-2.jpg",
+        "products/furniture/shelf-3.jpg",
+        "products/furniture/shelf-4.jpg",
+        "products/furniture/shelf-5.jpg",
+        "products/furniture/shelf-6.jpg"
+      ]
+    }
+  },
+  "sports": {
+    "banner": "categories/sports.jpg",
+    "types": {
+      "dumbbell": [
+        "products/sports/dumbbell-1.jpg",
+        "products/sports/dumbbell-2.jpg",
+        "products/sports/dumbbell-3.jpg",
+        "products/sports/dumbbell-4.jpg",
+        "products/sports/dumbbell-5.jpg",
+        "products/sports/dumbbell-6.jpg"
+      ],
+      "yoga-mat": [
+        "products/sports/yoga-mat-1.jpg",
+        "products/sports/yoga-mat-2.jpg",
+        "products/sports/yoga-mat-3.jpg",
+        "products/sports/yoga-mat-4.jpg",
+        "products/sports/yoga-mat-5.jpg",
+        "products/sports/yoga-mat-6.jpg"
+      ],
+      "exercise-bike": [
+        "products/sports/exercise-bike-1.jpg",
+        "products/sports/exercise-bike-2.jpg",
+        "products/sports/exercise-bike-3.jpg",
+        "products/sports/exercise-bike-4.jpg",
+        "products/sports/exercise-bike-5.jpg",
+        "products/sports/exercise-bike-6.jpg"
+      ],
+      "ball": [
+        "products/sports/ball-1.jpg",
+        "products/sports/ball-2.jpg",
+        "products/sports/ball-3.jpg",
+        "products/sports/ball-4.jpg",
+        "products/sports/ball-5.jpg",
+        "products/sports/ball-6.jpg"
+      ],
+      "expander": [
+        "products/sports/expander-1.jpg",
+        "products/sports/expander-2.jpg",
+        "products/sports/expander-3.jpg"
+      ],
+      "bench": [
+        "products/sports/bench-1.jpg",
+        "products/sports/bench-2.jpg",
+        "products/sports/bench-3.jpg",
+        "products/sports/bench-4.jpg"
+      ]
+    }
+  },
+  "beauty": {
+    "banner": "categories/beauty.jpg",
+    "types": {
+      "cream": [
+        "products/beauty/cream-1.jpg",
+        "products/beauty/cream-2.jpg",
+        "products/beauty/cream-3.jpg",
+        "products/beauty/cream-4.jpg",
+        "products/beauty/cream-5.jpg",
+        "products/beauty/cream-6.jpg"
+      ],
+      "shampoo": [
+        "products/beauty/shampoo-1.jpg",
+        "products/beauty/shampoo-2.jpg",
+        "products/beauty/shampoo-3.jpg",
+        "products/beauty/shampoo-4.jpg",
+        "products/beauty/shampoo-5.jpg",
+        "products/beauty/shampoo-6.jpg"
+      ],
+      "serum": [
+        "products/beauty/serum-1.jpg",
+        "products/beauty/serum-2.jpg",
+        "products/beauty/serum-3.jpg",
+        "products/beauty/serum-4.jpg",
+        "products/beauty/serum-5.jpg",
+        "products/beauty/serum-6.jpg"
+      ],
+      "toner": [
+        "products/beauty/toner-1.jpg",
+        "products/beauty/toner-2.jpg",
+        "products/beauty/toner-3.jpg",
+        "products/beauty/toner-4.jpg",
+        "products/beauty/toner-5.jpg",
+        "products/beauty/toner-6.jpg"
+      ],
+      "mask": [
+        "products/beauty/mask-1.jpg",
+        "products/beauty/mask-2.jpg",
+        "products/beauty/mask-3.jpg",
+        "products/beauty/mask-4.jpg",
+        "products/beauty/mask-5.jpg",
+        "products/beauty/mask-6.jpg"
+      ],
+      "sunscreen": [
+        "products/beauty/sunscreen-1.jpg",
+        "products/beauty/sunscreen-2.jpg",
+        "products/beauty/sunscreen-3.jpg",
+        "products/beauty/sunscreen-4.jpg",
+        "products/beauty/sunscreen-5.jpg",
+        "products/beauty/sunscreen-6.jpg"
+      ]
+    }
+  },
+  "books": {
+    "banner": "categories/books.jpg",
+    "types": {
+      "book": [
+        "products/books/book-1.jpg",
+        "products/books/book-2.jpg",
+        "products/books/book-3.jpg",
+        "products/books/book-4.jpg",
+        "products/books/book-5.jpg",
+        "products/books/book-6.jpg",
+        "products/books/book-7.jpg",
+        "products/books/book-8.jpg"
+      ]
+    }
+  },
+  "toys": {
+    "banner": "categories/toys.jpg",
+    "types": {
+      "construction": [
+        "products/toys/construction-1.jpg",
+        "products/toys/construction-2.jpg",
+        "products/toys/construction-3.jpg",
+        "products/toys/construction-4.jpg",
+        "products/toys/construction-5.jpg",
+        "products/toys/construction-6.jpg"
+      ],
+      "board-game": [
+        "products/toys/board-game-1.jpg",
+        "products/toys/board-game-2.jpg",
+        "products/toys/board-game-3.jpg",
+        "products/toys/board-game-4.jpg",
+        "products/toys/board-game-5.jpg",
+        "products/toys/board-game-6.jpg"
+      ],
+      "plush": [
+        "products/toys/plush-1.jpg",
+        "products/toys/plush-2.jpg",
+        "products/toys/plush-3.jpg",
+        "products/toys/plush-4.jpg",
+        "products/toys/plush-5.jpg",
+        "products/toys/plush-6.jpg"
+      ],
+      "puzzle": [
+        "products/toys/puzzle-1.jpg",
+        "products/toys/puzzle-2.jpg",
+        "products/toys/puzzle-3.jpg",
+        "products/toys/puzzle-4.jpg",
+        "products/toys/puzzle-5.jpg",
+        "products/toys/puzzle-6.jpg"
+      ],
+      "car": [
+        "products/toys/car-1.jpg",
+        "products/toys/car-2.jpg",
+        "products/toys/car-3.jpg",
+        "products/toys/car-4.jpg",
+        "products/toys/car-5.jpg",
+        "products/toys/car-6.jpg"
+      ],
+      "doll": [
+        "products/toys/doll-1.jpg",
+        "products/toys/doll-2.jpg",
+        "products/toys/doll-3.jpg",
+        "products/toys/doll-4.jpg",
+        "products/toys/doll-5.jpg",
+        "products/toys/doll-6.jpg"
+      ]
+    }
+  },
+  "clothing": {
+    "banner": "categories/clothing.jpg",
+    "types": {
+      "t-shirt": [
+        "products/clothing/t-shirt-1.jpg",
+        "products/clothing/t-shirt-2.jpg",
+        "products/clothing/t-shirt-3.jpg",
+        "products/clothing/t-shirt-4.jpg",
+        "products/clothing/t-shirt-5.jpg",
+        "products/clothing/t-shirt-6.jpg"
+      ],
+      "shirt": [
+        "products/clothing/shirt-1.jpg",
+        "products/clothing/shirt-2.jpg",
+        "products/clothing/shirt-3.jpg",
+        "products/clothing/shirt-4.jpg",
+        "products/clothing/shirt-5.jpg",
+        "products/clothing/shirt-6.jpg"
+      ],
+      "jacket": [
+        "products/clothing/jacket-1.jpg",
+        "products/clothing/jacket-2.jpg",
+        "products/clothing/jacket-3.jpg",
+        "products/clothing/jacket-4.jpg",
+        "products/clothing/jacket-5.jpg",
+        "products/clothing/jacket-6.jpg"
+      ],
+      "jeans": [
+        "products/clothing/jeans-1.jpg",
+        "products/clothing/jeans-2.jpg",
+        "products/clothing/jeans-3.jpg",
+        "products/clothing/jeans-4.jpg",
+        "products/clothing/jeans-5.jpg",
+        "products/clothing/jeans-6.jpg"
+      ],
+      "dress": [
+        "products/clothing/dress-1.jpg",
+        "products/clothing/dress-2.jpg",
+        "products/clothing/dress-3.jpg",
+        "products/clothing/dress-4.jpg",
+        "products/clothing/dress-5.jpg",
+        "products/clothing/dress-6.jpg"
+      ],
+      "sneakers": [
+        "products/clothing/sneakers-1.jpg",
+        "products/clothing/sneakers-2.jpg",
+        "products/clothing/sneakers-3.jpg",
+        "products/clothing/sneakers-4.jpg",
+        "products/clothing/sneakers-5.jpg",
+        "products/clothing/sneakers-6.jpg"
+      ],
+      "hoodie": [
+        "products/clothing/hoodie-1.jpg",
+        "products/clothing/hoodie-2.jpg",
+        "products/clothing/hoodie-3.jpg",
+        "products/clothing/hoodie-4.jpg",
+        "products/clothing/hoodie-5.jpg",
+        "products/clothing/hoodie-6.jpg"
+      ]
+    }
+  },
+  "kitchen": {
+    "banner": "categories/kitchen.jpg",
+    "types": {
+      "pan": [
+        "products/kitchen/pan-1.jpg",
+        "products/kitchen/pan-2.jpg",
+        "products/kitchen/pan-3.jpg",
+        "products/kitchen/pan-4.jpg",
+        "products/kitchen/pan-5.jpg",
+        "products/kitchen/pan-6.jpg"
+      ],
+      "pot": [
+        "products/kitchen/pot-1.jpg",
+        "products/kitchen/pot-2.jpg",
+        "products/kitchen/pot-3.jpg",
+        "products/kitchen/pot-4.jpg",
+        "products/kitchen/pot-5.jpg",
+        "products/kitchen/pot-6.jpg"
+      ],
+      "knife": [
+        "products/kitchen/knife-1.jpg",
+        "products/kitchen/knife-2.jpg",
+        "products/kitchen/knife-3.jpg",
+        "products/kitchen/knife-4.jpg",
+        "products/kitchen/knife-5.jpg",
+        "products/kitchen/knife-6.jpg"
+      ],
+      "plate": [
+        "products/kitchen/plate-1.jpg",
+        "products/kitchen/plate-2.jpg",
+        "products/kitchen/plate-3.jpg",
+        "products/kitchen/plate-4.jpg",
+        "products/kitchen/plate-5.jpg",
+        "products/kitchen/plate-6.jpg"
+      ],
+      "glass": [
+        "products/kitchen/glass-1.jpg",
+        "products/kitchen/glass-2.jpg",
+        "products/kitchen/glass-3.jpg",
+        "products/kitchen/glass-4.jpg",
+        "products/kitchen/glass-5.jpg",
+        "products/kitchen/glass-6.jpg"
+      ],
+      "cutting-board": [
+        "products/kitchen/cutting-board-1.jpg",
+        "products/kitchen/cutting-board-2.jpg",
+        "products/kitchen/cutting-board-3.jpg",
+        "products/kitchen/cutting-board-4.jpg",
+        "products/kitchen/cutting-board-5.jpg",
+        "products/kitchen/cutting-board-6.jpg"
+      ],
+      "set": [
+        "products/kitchen/set-1.jpg",
+        "products/kitchen/set-2.jpg",
+        "products/kitchen/set-3.jpg",
+        "products/kitchen/set-4.jpg",
+        "products/kitchen/set-5.jpg",
+        "products/kitchen/set-6.jpg"
+      ]
+    }
+  },
+  "auto": {
+    "banner": "categories/auto.jpg",
+    "types": {
+      "dashcam": [
+        "products/auto/dashcam-1.jpg",
+        "products/auto/dashcam-2.jpg",
+        "products/auto/dashcam-3.jpg",
+        "products/auto/dashcam-4.jpg"
+      ],
+      "seat-cover": [
+        "products/auto/seat-cover-1.jpg",
+        "products/auto/seat-cover-2.jpg",
+        "products/auto/seat-cover-3.jpg",
+        "products/auto/seat-cover-4.jpg",
+        "products/auto/seat-cover-5.jpg",
+        "products/auto/seat-cover-6.jpg"
+      ],
+      "phone-mount": [
+        "products/auto/phone-mount-1.jpg",
+        "products/auto/phone-mount-2.jpg",
+        "products/auto/phone-mount-3.jpg",
+        "products/auto/phone-mount-4.jpg",
+        "products/auto/phone-mount-5.jpg"
+      ],
+      "compressor": [
+        "products/auto/compressor-1.jpg",
+        "products/auto/compressor-2.jpg",
+        "products/auto/compressor-3.jpg",
+        "products/auto/compressor-4.jpg",
+        "products/auto/compressor-5.jpg"
+      ],
+      "bulb": [
+        "products/auto/bulb-1.jpg",
+        "products/auto/bulb-2.jpg",
+        "products/auto/bulb-3.jpg",
+        "products/auto/bulb-4.jpg",
+        "products/auto/bulb-5.jpg",
+        "products/auto/bulb-6.jpg"
+      ],
+      "engine-oil": [
+        "products/auto/engine-oil-1.jpg",
+        "products/auto/engine-oil-2.jpg",
+        "products/auto/engine-oil-3.jpg",
+        "products/auto/engine-oil-4.jpg",
+        "products/auto/engine-oil-5.jpg",
+        "products/auto/engine-oil-6.jpg"
+      ]
+    }
+  },
+  "pets": {
+    "banner": "categories/pets.jpg",
+    "types": {
+      "dry-food": [
+        "products/pets/dry-food-1.jpg",
+        "products/pets/dry-food-2.jpg",
+        "products/pets/dry-food-3.jpg",
+        "products/pets/dry-food-4.jpg",
+        "products/pets/dry-food-5.jpg",
+        "products/pets/dry-food-6.jpg"
+      ],
+      "wet-food": [
+        "products/pets/wet-food-1.jpg",
+        "products/pets/wet-food-2.jpg",
+        "products/pets/wet-food-3.jpg",
+        "products/pets/wet-food-4.jpg",
+        "products/pets/wet-food-5.jpg",
+        "products/pets/wet-food-6.jpg"
+      ],
+      "toy": [
+        "products/pets/toy-1.jpg",
+        "products/pets/toy-2.jpg",
+        "products/pets/toy-3.jpg",
+        "products/pets/toy-4.jpg",
+        "products/pets/toy-5.jpg",
+        "products/pets/toy-6.jpg"
+      ],
+      "bed": [
+        "products/pets/bed-1.jpg",
+        "products/pets/bed-2.jpg",
+        "products/pets/bed-3.jpg",
+        "products/pets/bed-4.jpg",
+        "products/pets/bed-5.jpg",
+        "products/pets/bed-6.jpg"
+      ],
+      "collar": [
+        "products/pets/collar-1.jpg",
+        "products/pets/collar-2.jpg",
+        "products/pets/collar-3.jpg",
+        "products/pets/collar-4.jpg",
+        "products/pets/collar-5.jpg",
+        "products/pets/collar-6.jpg"
+      ],
+      "carrier": [
+        "products/pets/carrier-1.jpg",
+        "products/pets/carrier-2.jpg",
+        "products/pets/carrier-3.jpg",
+        "products/pets/carrier-4.jpg"
+      ]
+    }
+  }
+}
