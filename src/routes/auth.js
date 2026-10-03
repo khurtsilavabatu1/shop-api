@@ -44,7 +44,34 @@ const resetSchema = z.object({
   password: strongPassword,
 })
 
-const publicUser = (u) => ({ id: u.id, name: u.name, email: u.email, createdAt: u.createdAt })
+const publicUser = (u) => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  phone: u.phone ?? null,
+  city: u.city ?? null,
+  address: u.address ?? null,
+  createdAt: u.createdAt,
+})
+
+/** არასავალდებულო ტექსტური ველი: "" ან null ასუფთავებს მნიშვნელობას */
+const optionalText = (schema) => z.union([schema, z.literal(''), z.null()])
+  .optional()
+  .transform((v) => (v === '' ? null : v))
+
+// ნებისმიერი ცვლილება მიმდინარე პაროლს მოითხოვს — ღია სესიიდან სხვამ ელფოსტა/პაროლი რომ ვერ შეცვალოს
+const updateProfileSchema = z.object({
+  currentPassword: z.string({ required_error: 'Current password is required' }).min(1, 'Current password is required'),
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').optional(),
+  email: email.optional(),
+  newPassword: strongPassword.optional(),
+  phone: optionalText(z.string().trim().regex(/^\+?[\d\s-]{9,20}$/, 'Enter a valid phone number')),
+  city: optionalText(z.string().trim().min(2, 'City must be at least 2 characters')),
+  address: optionalText(z.string().trim().min(5, 'Address must be at least 5 characters')),
+}).refine(
+  (b) => ['name', 'email', 'newPassword', 'phone', 'city', 'address'].some((k) => b[k] !== undefined),
+  { message: 'Provide at least one field to update', path: ['_'] },
+)
 
 function signAccessToken(userId) {
   return jwt.sign({ sub: userId, typ: 'access' }, process.env.JWT_SECRET, {
@@ -91,6 +118,41 @@ router.get('/me', requireAuth, async (req, res, next) => {
     const user = await prisma.user.findUnique({ where: { id: req.userId } })
     if (!user) return res.status(401).json({ message: 'User no longer exists', code: 'UNAUTHORIZED' })
     res.json({ user: publicUser(user) })
+  } catch (e) { next(e) }
+})
+
+/* PATCH /api/auth/me — პროფილის რედაქტირება: სახელი, ელფოსტა, პაროლი, საკონტაქტო მონაცემები */
+router.patch('/me', requireAuth, validate(updateProfileSchema), async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } })
+    if (!user) return res.status(401).json({ message: 'User no longer exists', code: 'UNAUTHORIZED' })
+
+    const { currentPassword, newPassword, ...fields } = req.body
+    // 400 და არა 401: 401-ზე ფრონტენდი ჩვეულებრივ მომხმარებელს აგდებს სისტემიდან
+    if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      return res.status(400).json({
+        message: 'Current password is incorrect',
+        code: 'INVALID_CURRENT_PASSWORD',
+        errors: { currentPassword: 'Current password is incorrect' },
+      })
+    }
+
+    if (fields.email && fields.email !== user.email) {
+      const taken = await prisma.user.findUnique({ where: { email: fields.email } })
+      if (taken) {
+        return res.status(409).json({
+          message: 'This email is already registered',
+          code: 'EMAIL_TAKEN',
+          errors: { email: 'This email is already registered' },
+        })
+      }
+    }
+
+    const data = Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== undefined))
+    if (newPassword) data.passwordHash = await bcrypt.hash(newPassword, 10)
+
+    const updated = await prisma.user.update({ where: { id: user.id }, data })
+    res.json({ user: publicUser(updated) })
   } catch (e) { next(e) }
 })
 

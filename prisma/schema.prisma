@@ -12,8 +12,13 @@ model User {
   name         String
   email        String              @unique
   passwordHash String
+  phone        String?
+  city         String?
+  address      String?
   createdAt    DateTime            @default(now())
   resetCodes   PasswordResetCode[]
+  cartItems    CartItem[]
+  orders       Order[]
 }
 
 model PasswordResetCode {
@@ -59,6 +64,8 @@ model Product {
   categoryId     String
   category       Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   attributes     ProductAttribute[]
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
   createdAt      DateTime           @default(now())
 
   @@index([categoryId])
@@ -76,6 +83,61 @@ model ProductAttribute {
 
   @@index([productId])
   @@index([key, value])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  qty       Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+/// შეკვეთა ინახავს პროდუქტების „სურათს" შეკვეთის მომენტისთვის — კატალოგის
+/// გადაგენერირება ან ფასის შეცვლა ისტორიას არ ცვლის.
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String      // pending_payment | paid
+  subtotal        Float
+  shippingFee     Float
+  total           Float
+  currency        String      @default("GEL")
+  fullName        String
+  phone           String
+  city            String
+  address         String
+  cardBrand       String
+  cardLast4       String
+  codeHash        String?
+  codeExpiresAt   DateTime?
+  codeAttempts    Int         @default(0)
+  paidAt          DateTime?
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  slug      String
+  title     String
+  image     String
+  price     Float
+  qty       Int
+
+  @@index([orderId])
 }
 
 model Meta {

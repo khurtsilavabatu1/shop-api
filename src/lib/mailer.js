@@ -31,25 +31,39 @@ function parseFrom(raw) {
   return { name: fallback.name, email: raw.trim() }
 }
 
-const htmlBody = (code, minutes) => `
+/** წერილის ტექსტები ტიპის მიხედვით: პაროლის აღდგენა / გადახდის დადასტურება */
+const TEMPLATES = {
+  reset: {
+    tag: 'reset-code',
+    subject: (code) => `${code} — პაროლის აღდგენის კოდი`,
+    title: 'პაროლის აღდგენა',
+    intro: 'თქვენ მოითხოვეთ პაროლის აღდგენა <strong>Cyber</strong>-ზე. შეიყვანეთ ეს კოდი:',
+    outro: 'თუ პაროლის აღდგენა არ მოგითხოვიათ, იგნორირება გაუკეთეთ ამ წერილს — თქვენი პაროლი უცვლელი რჩება.',
+    text: (code, minutes) =>
+      `თქვენი პაროლის აღდგენის კოდია: ${code}\n\nკოდი მოქმედებს ${minutes} წუთი.\n\nთუ აღდგენა არ მოგითხოვიათ, იგნორირება გაუკეთეთ ამ წერილს.`,
+  },
+  payment: {
+    tag: 'payment-code',
+    subject: (code) => `${code} — გადახდის დადასტურების კოდი`,
+    title: 'გადახდის დადასტურება',
+    intro: 'გადახდის დასასრულებლად <strong>Cyber</strong>-ზე შეიყვანეთ ეს კოდი:',
+    outro: 'თუ ეს გადახდა თქვენ არ წამოგიწყიათ, იგნორირება გაუკეთეთ ამ წერილს — თანხა არ ჩამოიჭრება.',
+    text: (code, minutes) =>
+      `თქვენი გადახდის დადასტურების კოდია: ${code}\n\nკოდი მოქმედებს ${minutes} წუთი.\n\nთუ გადახდა თქვენ არ წამოგიწყიათ, იგნორირება გაუკეთეთ ამ წერილს.`,
+  },
+}
+
+const htmlBody = (t, code, minutes) => `
 <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#111">
-  <h1 style="font-size:20px;margin:0 0 8px">პაროლის აღდგენა</h1>
-  <p style="margin:0 0 24px;color:#555;font-size:14px;line-height:1.6">
-    თქვენ მოითხოვეთ პაროლის აღდგენა <strong>Cyber</strong>-ზე. შეიყვანეთ ეს კოდი:
-  </p>
+  <h1 style="font-size:20px;margin:0 0 8px">${t.title}</h1>
+  <p style="margin:0 0 24px;color:#555;font-size:14px;line-height:1.6">${t.intro}</p>
   <div style="font-size:34px;font-weight:700;letter-spacing:10px;text-align:center;
               padding:20px;background:#f4f4f5;border-radius:10px;margin-bottom:24px">${code}</div>
   <p style="margin:0 0 8px;color:#555;font-size:14px">კოდი მოქმედებს <strong>${minutes} წუთი</strong>.</p>
-  <p style="margin:0;color:#888;font-size:13px;line-height:1.6">
-    თუ პაროლის აღდგენა არ მოგითხოვიათ, იგნორირება გაუკეთეთ ამ წერილს —
-    თქვენი პაროლი უცვლელი რჩება.
-  </p>
+  <p style="margin:0;color:#888;font-size:13px;line-height:1.6">${t.outro}</p>
 </div>`
 
-const textBody = (code, minutes) =>
-  `თქვენი პაროლის აღდგენის კოდია: ${code}\n\nკოდი მოქმედებს ${minutes} წუთი.\n\nთუ აღდგენა არ მოგითხოვიათ, იგნორირება გაუკეთეთ ამ წერილს.`
-
-async function sendViaApi({ to, subject, code, minutes }) {
+async function sendViaApi({ to, subject, t, code, minutes }) {
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
@@ -61,8 +75,8 @@ async function sendViaApi({ to, subject, code, minutes }) {
       sender: parseFrom(process.env.MAIL_FROM),
       to: [{ email: to }],
       subject,
-      htmlContent: htmlBody(code, minutes),
-      textContent: textBody(code, minutes),
+      htmlContent: htmlBody(t, code, minutes),
+      textContent: t.text(code, minutes),
     }),
   })
 
@@ -72,37 +86,41 @@ async function sendViaApi({ to, subject, code, minutes }) {
   }
 }
 
-async function sendViaSmtp({ to, subject, code, minutes }) {
+async function sendViaSmtp({ to, subject, t, code, minutes }) {
   await transporter.sendMail({
     from: process.env.MAIL_FROM || `Cyber <${process.env.SMTP_USER}>`,
     to,
     subject,
-    text: textBody(code, minutes),
-    html: htmlBody(code, minutes),
+    text: t.text(code, minutes),
+    html: htmlBody(t, code, minutes),
   })
 }
 
 /**
- * აგზავნის აღდგენის კოდს. ჩავარდნისას კოდი ლოგში იბეჭდება —
+ * აგზავნის ერთჯერად კოდს. ჩავარდნისას კოდი ლოგში იბეჭდება —
  * მოთხოვნა არასდროს ვარდება ელფოსტის გამო.
  * @returns {Promise<boolean>} გაიგზავნა თუ არა რეალური წერილი
  */
-export async function sendResetCode(to, code, minutes) {
-  const payload = { to, subject: `${code} — პაროლის აღდგენის კოდი`, code, minutes }
+async function sendCode(kind, to, code, minutes) {
+  const t = TEMPLATES[kind]
+  const payload = { to, subject: t.subject(code), t, code, minutes }
 
   if (mailMode === 'console') {
-    console.log(`[reset-code] ${to} -> ${code} (valid ${minutes}m)  [ელფოსტა გამორთულია]`)
+    console.log(`[${t.tag}] ${to} -> ${code} (valid ${minutes}m)  [ელფოსტა გამორთულია]`)
     return false
   }
 
   try {
     if (mailMode === 'api') await sendViaApi(payload)
     else await sendViaSmtp(payload)
-    console.log(`[reset-code] ${to} -> წერილი გაიგზავნა (${mailMode})`)
+    console.log(`[${t.tag}] ${to} -> წერილი გაიგზავნა (${mailMode})`)
     return true
   } catch (err) {
-    console.error(`[reset-code] ${to} -> გაგზავნა ჩავარდა (${mailMode}): ${err.message}`)
-    console.log(`[reset-code] ${to} -> ${code} (valid ${minutes}m)  [fallback: კონსოლი]`)
+    console.error(`[${t.tag}] ${to} -> გაგზავნა ჩავარდა (${mailMode}): ${err.message}`)
+    console.log(`[${t.tag}] ${to} -> ${code} (valid ${minutes}m)  [fallback: კონსოლი]`)
     return false
   }
 }
+
+export const sendResetCode = (to, code, minutes) => sendCode('reset', to, code, minutes)
+export const sendPaymentCode = (to, code, minutes) => sendCode('payment', to, code, minutes)

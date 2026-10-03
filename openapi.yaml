@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Cyber Storefront API — Authentication
+  title: Cyber Storefront API
   version: "1.0.0"
   description: |
-    **Cyber** ონლაინ მაღაზიის ავტორიზაციის API.
+    **Cyber** ონლაინ მაღაზიის API: კატალოგი, ავტორიზაცია, კალათა, ჩექაუთი და პროფილი.
 
     ---
 
@@ -183,6 +183,16 @@ info:
     | `INVALID_RESET_CODE` | 400 | აღდგენის კოდი არასწორი ან ვადაგასულია |
     | `TOO_MANY_ATTEMPTS` | 429 | 5+ არასწორი კოდი — მოითხოვე ახალი |
     | `RESET_TOKEN_USED` | 400 | resetToken უკვე გამოყენებულია |
+    | `INVALID_CURRENT_PASSWORD` | 400 | პროფილის რედაქტირებისას მიმდინარე პაროლი არასწორია |
+    | `PRODUCT_NOT_FOUND` | 404 | კალათაში დასამატებელი პროდუქტი არ არსებობს |
+    | `CART_ITEM_NOT_FOUND` | 404 | კალათის პოზიცია არ მოიძებნა |
+    | `OUT_OF_STOCK` / `INSUFFICIENT_STOCK` | 409 | მარაგი არ კმარა (აქვს `available` ან `items`) |
+    | `CART_EMPTY` | 409 | შეკვეთა ცარიელი კალათით |
+    | `CARD_DECLINED` | 402 | ბანკმა ბარათი უარყო (სატესტო ბარათი `4000 0000 0000 0002`) |
+    | `INVALID_PAYMENT_CODE` | 400 | გადახდის კოდი არასწორი ან ვადაგასულია |
+    | `RESEND_TOO_SOON` | 429 | ახალი კოდი 30 წამში ერთხელ (აქვს `retryAfterSeconds`) |
+    | `ORDER_ALREADY_PAID` | 409 | შეკვეთა უკვე გადახდილია |
+    | `ORDER_NOT_FOUND` | 404 | შეკვეთა არ არსებობს ან სხვისია |
 
     ---
 
@@ -211,6 +221,33 @@ info:
 
     ანუ სრული ფლოუს ტესტირება ელფოსტის სერვისის გარეშე შეგიძლია.
     რეალურ პროდუქტში `devCode` არ იარსებებდა.
+
+    ---
+
+    ## 4.1 კალათა, ჩექაუთი და გადახდა 🔒
+
+    ყველაფერი ამ ნაწილში **ტოკენს მოითხოვს** — კალათა სერვერზე ინახება და
+    მომხმარებელზეა მიბმული, ამიტომ არც გვერდის განახლებისას იკარგება და არც სხვა მოწყობილობაზე.
+
+    ```
+    კალათა     GET /cart · POST /cart/items · PATCH /cart/items/:id · DELETE /cart/items/:id · DELETE /cart
+    ჩექაუთი    GET /checkout                              → კალათა + ჯამები + პროფილიდან შევსებული მისამართი
+    გადახდა 1  POST /orders  { shipping, card }           → { orderId, devCode? }  + კოდი ელფოსტაზე
+    გადახდა 2  POST /orders/:id/confirm  { code }         → { order }  — კალათა სუფთავდება
+    ისტორია    GET /orders · GET /orders/:id
+    ```
+
+    **გადახდა ვითომაა** — ფული არ ჩამოიჭრება და ბარათის სრული ნომერი არსად ინახება
+    (შეკვეთაში მხოლოდ ბრენდი და ბოლო 4 ციფრი). სატესტო ბარათები, ნებისმიერი მომავალი ვადით (`MM/YY`) და CVC-ით:
+
+    | ბარათი | შედეგი |
+    |---|---|
+    | `4242 4242 4242 4242` | ✅ წარმატება |
+    | `4000 0000 0000 0002` | ❌ `402 CARD_DECLINED` |
+    | Luhn-ის შემოწმებას ვერ გადის | `422`, `errors["card.number"]` |
+
+    მიწოდება უფასოა **100 ₾-დან**, ქვემოთ — 5 ₾. კალათაში ფასი ყოველთვის მიმდინარეა;
+    შეკვეთა ფასს „ყინავს" შექმნის მომენტში.
 
     ---
 
@@ -261,7 +298,11 @@ tags:
   - name: Catalog
     description: კატეგორიები და პროდუქტები — ფილტრაცია, სორტირება, პაგინაცია, ძებნა
   - name: Auth
-    description: რეგისტრაცია, შესვლა, პაროლის აღდგენა
+    description: რეგისტრაცია, შესვლა, პაროლის აღდგენა, პროფილის რედაქტირება
+  - name: Cart
+    description: 🔒 კალათა — დამატება, რაოდენობის შეცვლა, წაშლა
+  - name: Checkout
+    description: 🔒 ჩექაუთი, ვითომ გადახდა ელფოსტის კოდით, შეკვეთების ისტორია
 
 paths:
   /health:
@@ -496,6 +537,57 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+    patch:
+      tags: [Auth]
+      summary: პროფილის რედაქტირება
+      description: |
+        🔒 **საჭიროებს ტოკენს.** გაგზავნე მხოლოდ ის ველები, რომლის შეცვლაც გინდა.
+
+        **`currentPassword` ყოველთვის სავალდებულოა** — ნებისმიერ ცვლილებამდე სერვერი
+        ამოწმებს მიმდინარე პაროლს. არასწორზე: `400 INVALID_CURRENT_PASSWORD` (და არა `401`,
+        რომ ფრონტენდმა მომხმარებელი სისტემიდან არ გააგდოს).
+
+        - `newPassword` — ახალი პაროლი (იგივე წესები, რაც რეგისტრაციაზე)
+        - `phone`, `city`, `address` — `""` ან `null` ასუფთავებს ველს
+        - ეს ველები ჩექაუთზე მისამართს ავტომატურად ავსებს (`GET /checkout`)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword]
+              properties:
+                currentPassword: { type: string, example: "Password1" }
+                name: { type: string, minLength: 2, example: "Nino Beridze" }
+                email: { type: string, format: email, example: "nino.new@example.com" }
+                newPassword: { type: string, minLength: 8, example: "NewPass123" }
+                phone: { type: string, nullable: true, example: "+995 555 12 34 56" }
+                city: { type: string, nullable: true, example: "Tbilisi" }
+                address: { type: string, nullable: true, example: "Rustaveli Ave 12, apt 5" }
+      responses:
+        "200":
+          description: პროფილი განახლდა
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+        "400":
+          description: მიმდინარე პაროლი არასწორია (`INVALID_CURRENT_PASSWORD`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: ახალი ელფოსტა სხვა ანგარიშზეა (`EMAIL_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationError" }
+        "422":
+          $ref: "#/components/responses/Validation"
 
   /auth/logout:
     post:
@@ -630,6 +722,286 @@ paths:
         "422":
           $ref: "#/components/responses/Validation"
 
+  /cart:
+    get:
+      tags: [Cart]
+      summary: ჩემი კალათა
+      description: 🔒 აბრუნებს პოზიციებს, საერთო რაოდენობას (`totalQty`) და ჯამს (`subtotal`).
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/Cart" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    delete:
+      tags: [Cart]
+      summary: კალათის გასუფთავება
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/Cart" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: კალათაში დამატება
+      description: |
+        🔒 თუ პროდუქტი კალათაში უკვე არის, **რაოდენობა ემატება** (ახალი პოზიცია არ იქმნება)
+        — პასუხი მაშინ `200`-ია, ახალზე `201`.
+
+        ყველა ცვლილება აბრუნებს **მთლიან განახლებულ კალათას** — ცალკე `GET /cart` არ გჭირდება.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId]
+              properties:
+                productId: { type: string, description: "პროდუქტის `id` (არა slug)" }
+                qty: { type: integer, minimum: 1, maximum: 99, default: 1 }
+      responses:
+        "200": { $ref: "#/components/responses/Cart" }
+        "201": { $ref: "#/components/responses/Cart" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: პროდუქტი არ არსებობს (`PRODUCT_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409": { $ref: "#/components/responses/NotEnoughStock" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+  /cart/items/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: "კალათის პოზიციის `id` (`items[].id`, არა productId)", schema: { type: string } }
+    patch:
+      tags: [Cart]
+      summary: რაოდენობის შეცვლა (+ / −)
+      description: |
+        🔒 აყენებს **ზუსტ** რაოდენობას. სტეპერზე `+` → `qty + 1`, `−` → `qty - 1`.
+        `0` დაუშვებელია — პოზიციის მოსაშორებლად გამოიყენე `DELETE`.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [qty]
+              properties:
+                qty: { type: integer, minimum: 1, maximum: 99, example: 2 }
+      responses:
+        "200": { $ref: "#/components/responses/Cart" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/CartItemNotFound" }
+        "409": { $ref: "#/components/responses/NotEnoughStock" }
+        "422":
+          $ref: "#/components/responses/Validation"
+    delete:
+      tags: [Cart]
+      summary: პოზიციის წაშლა
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/Cart" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/CartItemNotFound" }
+
+  /checkout:
+    get:
+      tags: [Checkout]
+      summary: ჩექაუთის გვერდის მონაცემები
+      description: |
+        🔒 **ჩექაუთის გვერდი ავტორიზაციის გარეშე არ იხსნება** — `401`-ზე გადაამისამართე `/login`-ზე
+        და შესვლის შემდეგ დააბრუნე ჩექაუთზე.
+
+        აბრუნებს კალათას, ჯამებს მიწოდების ჩათვლით და `shipping`-ს — პროფილიდან
+        წინასწარ შევსებულ მისამართს ფორმისთვის. ცარიელ კალათაზე `items: []`.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CheckoutSummary" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /orders:
+    post:
+      tags: [Checkout]
+      summary: "გადახდა — ნაბიჯი 1: შეკვეთა + ბარათი → კოდი ელფოსტაზე"
+      description: |
+        🔒 შეკვეთა იქმნება **სერვერის კალათიდან** (პროდუქტების სიას თავად არ აგზავნი) სტატუსით
+        `pending_payment`, ხოლო ელფოსტაზე მიდის 6-ციფრიანი კოდი (ვადა **10 წუთი**).
+
+        კოდი, როცა `DEV_EXPOSE_RESET_CODE=true`, ბრუნდება `devCode`-შიც.
+
+        სატესტო ბარათები: `4242 4242 4242 4242` ✅, `4000 0000 0000 0002` → `402 CARD_DECLINED`.
+        ვალიდაციის შეცდომები ჩადგმულ ველებზე: `errors["card.number"]`, `errors["shipping.phone"]`.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shipping, card]
+              properties:
+                shipping: { $ref: "#/components/schemas/Shipping" }
+                card:
+                  type: object
+                  required: [number, holder, expiry, cvc]
+                  properties:
+                    number: { type: string, example: "4242 4242 4242 4242" }
+                    holder: { type: string, example: "NINO BERIDZE" }
+                    expiry: { type: string, pattern: "^(0[1-9]|1[0-2])/\\d{2}$", example: "12/29" }
+                    cvc: { type: string, example: "123" }
+      responses:
+        "201":
+          description: შეკვეთა შეიქმნა, კოდი გაიგზავნა
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId: { type: string }
+                  status: { type: string, example: pending_payment }
+                  total: { type: number, example: 245.5 }
+                  currency: { type: string, example: GEL }
+                  message: { type: string }
+                  expiresInMinutes: { type: integer, example: 10 }
+                  devCode: { type: string, example: "483920", description: "მხოლოდ DEV_EXPOSE_RESET_CODE=true-ზე" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402":
+          description: ბარათი უარყოფილია (`CARD_DECLINED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: კალათა ცარიელია (`CART_EMPTY`) ან მარაგი არ კმარა (`INSUFFICIENT_STOCK`, `items[]`-ით)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+    get:
+      tags: [Checkout]
+      summary: ჩემი შეკვეთები
+      description: 🔒 შეკვეთების ისტორია, ახალი პირველი.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Order" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /orders/{id}/confirm:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Checkout]
+      summary: "გადახდა — ნაბიჯი 2: კოდის დადასტურება → გადახდა"
+      description: |
+        🔒 სწორ კოდზე შეკვეთა ხდება `paid`, მარაგი ჩამოიჭრება და **კალათა სუფთავდება**.
+        5 არასწორი მცდელობის შემდეგ — `429`, მოითხოვე ახალი კოდი.
+
+        თუ კოდის მოსვლამდე ვიღაცამ ბოლო ნივთი იყიდა — `409 INSUFFICIENT_STOCK`, არაფერი ჩამოიჭრება.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, pattern: "^\\d{6}$", example: "483920" }
+      responses:
+        "200":
+          description: გადახდილია
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order: { $ref: "#/components/schemas/Order" }
+        "400":
+          description: კოდი არასწორი ან ვადაგასულია (`INVALID_PAYMENT_CODE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/OrderNotFound" }
+        "409":
+          description: უკვე გადახდილია (`ORDER_ALREADY_PAID`) ან მარაგი აღარ კმარა (`INSUFFICIENT_STOCK`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+        "429":
+          description: ძალიან ბევრი მცდელობა (`TOO_MANY_ATTEMPTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /orders/{id}/resend-code:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Checkout]
+      summary: კოდის ხელახლა გაგზავნა
+      description: 🔒 ახალი კოდი, ახალი 10 წუთი, მცდელობები ნულდება. **30 წამში ერთხელ.**
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: გაიგზავნა
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  expiresInMinutes: { type: integer, example: 10 }
+                  devCode: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/OrderNotFound" }
+        "409":
+          description: შეკვეთა უკვე გადახდილია (`ORDER_ALREADY_PAID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429":
+          description: ძალიან ადრეა (`RESEND_TOO_SOON`, `retryAfterSeconds`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /orders/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Checkout]
+      summary: ერთი შეკვეთა
+      description: 🔒 მხოლოდ საკუთარი — სხვისი შეკვეთის id-ზე `404`. შეკვეთის დადასტურების გვერდისთვის.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order: { $ref: "#/components/schemas/Order" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/OrderNotFound" }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -638,6 +1010,36 @@ components:
       bearerFormat: JWT
 
   responses:
+    Unauthorized:
+      description: ტოკენი არ არის, არასწორია ან ვადაგასულია (`UNAUTHORIZED` / `TOKEN_EXPIRED`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Cart:
+      description: განახლებული კალათა
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Cart" }
+    NotEnoughStock:
+      description: მარაგი არ კმარა (`OUT_OF_STOCK` / `INSUFFICIENT_STOCK`); `available` — რამდენია მარაგში
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string, example: "Only 3 left in stock" }
+              code: { type: string, example: INSUFFICIENT_STOCK }
+              available: { type: integer, example: 3 }
+    CartItemNotFound:
+      description: პოზიცია არ მოიძებნა (`CART_ITEM_NOT_FOUND`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    OrderNotFound:
+      description: შეკვეთა არ მოიძებნა (`ORDER_NOT_FOUND`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
     Validation:
       description: ვალიდაციის შეცდომა (`VALIDATION_ERROR`)
       content:
@@ -651,7 +1053,90 @@ components:
         id: { type: string, example: "clx8f2k9a0000..." }
         name: { type: string, example: "Nino Beridze" }
         email: { type: string, example: "nino@example.com" }
+        phone: { type: string, nullable: true, example: "+995 555 12 34 56" }
+        city: { type: string, nullable: true, example: "Tbilisi" }
+        address: { type: string, nullable: true, example: "Rustaveli Ave 12, apt 5" }
         createdAt: { type: string, format: date-time }
+
+    CartItem:
+      type: object
+      properties:
+        id: { type: string, description: "პოზიციის id — PATCH/DELETE-ისთვის" }
+        productId: { type: string }
+        qty: { type: integer, example: 2 }
+        lineTotal: { type: number, example: 199.98 }
+        product:
+          type: object
+          properties:
+            id: { type: string }
+            slug: { type: string }
+            title: { type: string }
+            brand: { type: string }
+            image: { type: string }
+            price: { type: number, example: 99.99 }
+            oldPrice: { type: number, nullable: true }
+            currency: { type: string, example: GEL }
+            stock: { type: integer, example: 12 }
+            inStock: { type: boolean }
+
+    Cart:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/CartItem" } }
+        totalQty: { type: integer, example: 3, description: "ჰედერის კალათის ბეჯისთვის" }
+        subtotal: { type: number, example: 299.97 }
+        currency: { type: string, example: GEL }
+
+    Shipping:
+      type: object
+      required: [fullName, phone, city, address]
+      properties:
+        fullName: { type: string, example: "Nino Beridze" }
+        phone: { type: string, example: "+995 555 12 34 56" }
+        city: { type: string, example: "Tbilisi" }
+        address: { type: string, example: "Rustaveli Ave 12, apt 5" }
+
+    CheckoutSummary:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/CartItem" } }
+        totalQty: { type: integer }
+        subtotal: { type: number, example: 89.5 }
+        shippingFee: { type: number, example: 5 }
+        total: { type: number, example: 94.5 }
+        currency: { type: string, example: GEL }
+        freeShippingFrom: { type: number, example: 100 }
+        shipping: { $ref: "#/components/schemas/Shipping" }
+
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [pending_payment, paid] }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId: { type: string, nullable: true, description: "null, თუ პროდუქტი კატალოგიდან წაიშალა" }
+              slug: { type: string }
+              title: { type: string }
+              image: { type: string }
+              price: { type: number, description: "ფასი შეკვეთის მომენტში" }
+              qty: { type: integer }
+              lineTotal: { type: number }
+        subtotal: { type: number }
+        shippingFee: { type: number }
+        total: { type: number }
+        currency: { type: string, example: GEL }
+        shipping: { $ref: "#/components/schemas/Shipping" }
+        payment:
+          type: object
+          properties:
+            brand: { type: string, example: visa }
+            last4: { type: string, example: "4242" }
+        createdAt: { type: string, format: date-time }
+        paidAt: { type: string, format: date-time, nullable: true }
 
     AuthResponse:
       type: object

@@ -6,6 +6,8 @@ import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
 import authRouter from './routes/auth.js'
 import catalogRouter from './routes/catalog.js'
+import cartRouter from './routes/cart.js'
+import checkoutRouter from './routes/checkout.js'
 import { latency } from './middleware.js'
 import { mailMode } from './lib/mailer.js'
 import { prisma } from './db.js'
@@ -35,6 +37,8 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: 'C
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', time: new Date().toISOString() }))
 app.use('/api/auth', authRouter)
 app.use('/api', catalogRouter)
+app.use('/api/cart', cartRouter)
+app.use('/api', checkoutRouter)
 
 app.get('/', (_req, res) => res.redirect('/docs'))
 

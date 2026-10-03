@@ -238,6 +238,32 @@ model PasswordResetCode {
 `@unique` ბაზის დონეზეა — ანუ დუბლიკატი შეუძლებელია მაშინაც კი, თუ ორი მოთხოვნა
 ზუსტად ერთდროულად მოვა. კოდში `409 EMAIL_TAKEN` უფრო ლამაზი შეტყობინებისთვისაა.
 
+### კალათა და შეკვეთები
+
+```prisma
+model CartItem {
+  userId, productId, qty
+  @@unique([userId, productId])        ← ერთი პროდუქტი კალათაში ერთხელ; ხელახლა დამატება qty-ს ზრდის
+}                                        product-თან onDelete: Cascade — კატალოგის გადაგენერირება კალათებს ასუფთავებს
+
+model Order {
+  status        ← pending_payment → paid
+  subtotal, shippingFee, total            ← ფასები შეკვეთის მომენტში
+  fullName, phone, city, address          ← მიწოდების მისამართი
+  cardBrand, cardLast4                    ← ბარათიდან მხოლოდ ეს; სრული ნომერი არსად ინახება
+  codeHash, codeExpiresAt, codeAttempts   ← გადახდის კოდი — ზუსტად ისე, როგორც PasswordResetCode
+}
+
+model OrderItem {
+  productId String?   ← onDelete: SetNull — პროდუქტის წაშლისას შეკვეთა რჩება
+  slug, title, image, price, qty         ← პროდუქტის „ფოტოსურათი": ისტორია კატალოგზე არ არის დამოკიდებული
+}
+```
+
+გადახდის დადასტურება (`POST /orders/:id/confirm`) ერთ ტრანზაქციაშია: მარაგი ჩამოიჭრება
+მხოლოდ იქ, სადაც `stock >= qty` — თუ ერთ პოზიციაზეც არ კმარა, არაფერი იცვლება და
+ბრუნდება `409 INSUFFICIENT_STOCK`. ორი ერთდროული მყიდველი ბოლო ნივთს ორჯერ ვერ იყიდის.
+
 ---
 
 ## 8. შეცდომების ერთიანი ფორმატი
