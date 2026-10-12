@@ -12,6 +12,8 @@ model User {
   name         String
   email        String              @unique
   passwordHash String
+  // ⚠️ მოძველებული — მისამართები Address-შია. სერვერის ჩართვისას გადაიტანება და ცარიელდება;
+  // შემდეგ deploy-ზე სვეტები წაიშლება (ცარიელი სვეტის წაშლა db push-ს არ აჩერებს)
   phone        String?
   city         String?
   address      String?
@@ -19,6 +21,23 @@ model User {
   resetCodes   PasswordResetCode[]
   cartItems    CartItem[]
   orders       Order[]
+  addresses    Address[]
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String?  // „სახლი", „სამსახური"
+  fullName  String   // მიმღები — შეიძლება მომხმარებლის სახელს არ ემთხვეოდეს
+  phone     String
+  city      String
+  address   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model PasswordResetCode {

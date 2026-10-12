@@ -193,6 +193,8 @@ info:
     | `RESEND_TOO_SOON` | 429 | ახალი კოდი 30 წამში ერთხელ (აქვს `retryAfterSeconds`) |
     | `ORDER_ALREADY_PAID` | 409 | შეკვეთა უკვე გადახდილია |
     | `ORDER_NOT_FOUND` | 404 | შეკვეთა არ არსებობს ან სხვისია |
+    | `ADDRESS_NOT_FOUND` | 404 | მისამართი არ არსებობს ან სხვისია |
+    | `ADDRESS_LIMIT_REACHED` | 409 | უკვე 10 მისამართია შენახული |
 
     ---
 
@@ -231,7 +233,8 @@ info:
 
     ```
     კალათა     GET /cart · POST /cart/items · PATCH /cart/items/:id · DELETE /cart/items/:id · DELETE /cart
-    ჩექაუთი    GET /checkout                              → კალათა + ჯამები + პროფილიდან შევსებული მისამართი
+    მისამართები GET/POST /addresses · PATCH/DELETE /addresses/:id
+    ჩექაუთი    GET /checkout                              → კალათა + ჯამები + ნაგულისხმევი მისამართი + მისამართების სია
     გადახდა 1  POST /orders  { shipping, card }           → { orderId, devCode? }  + კოდი ელფოსტაზე
     გადახდა 2  POST /orders/:id/confirm  { code }         → { order }  — კალათა სუფთავდება
     ისტორია    GET /orders · GET /orders/:id
@@ -299,10 +302,14 @@ tags:
     description: კატეგორიები და პროდუქტები — ფილტრაცია, სორტირება, პაგინაცია, ძებნა
   - name: Auth
     description: რეგისტრაცია, შესვლა, პაროლის აღდგენა, პროფილის რედაქტირება
+  - name: Addresses
+    description: 🔒 მიწოდების მისამართები — რამდენიმე, ერთი ნაგულისხმევი
   - name: Cart
     description: 🔒 კალათა — დამატება, რაოდენობის შეცვლა, წაშლა
   - name: Checkout
-    description: 🔒 ჩექაუთი, ვითომ გადახდა ელფოსტის კოდით, შეკვეთების ისტორია
+    description: 🔒 ჩექაუთი და ვითომ გადახდა ელფოსტის კოდით
+  - name: Orders
+    description: 🔒 შეკვეთების ისტორია და ერთი შეკვეთის გვერდი
 
 paths:
   /health:
@@ -548,8 +555,7 @@ paths:
         რომ ფრონტენდმა მომხმარებელი სისტემიდან არ გააგდოს).
 
         - `newPassword` — ახალი პაროლი (იგივე წესები, რაც რეგისტრაციაზე)
-        - `phone`, `city`, `address` — `""` ან `null` ასუფთავებს ველს
-        - ეს ველები ჩექაუთზე მისამართს ავტომატურად ავსებს (`GET /checkout`)
+        - ტელეფონი და მისამართი პროფილში **აღარ არის** — იხ. `Addresses` (`/addresses`)
       security: [{ bearerAuth: [] }]
       requestBody:
         required: true
@@ -563,9 +569,6 @@ paths:
                 name: { type: string, minLength: 2, example: "Nino Beridze" }
                 email: { type: string, format: email, example: "nino.new@example.com" }
                 newPassword: { type: string, minLength: 8, example: "NewPass123" }
-                phone: { type: string, nullable: true, example: "+995 555 12 34 56" }
-                city: { type: string, nullable: true, example: "Tbilisi" }
-                address: { type: string, nullable: true, example: "Rustaveli Ave 12, apt 5" }
       responses:
         "200":
           description: პროფილი განახლდა
@@ -722,6 +725,107 @@ paths:
         "422":
           $ref: "#/components/responses/Validation"
 
+  /addresses:
+    get:
+      tags: [Addresses]
+      summary: ჩემი მისამართები
+      description: 🔒 ნაგულისხმევი ყოველთვის პირველია, დანარჩენი — დამატების მიხედვით.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Address" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Addresses]
+      summary: მისამართის დამატება
+      description: |
+        🔒 **პირველი მისამართი ავტომატურად ნაგულისხმევია.** `isDefault: true` ახალს
+        ნაგულისხმევად აქცევს და წინას ხსნის. მაქსიმუმ **10** მისამართი.
+
+        ნაგულისხმევის შეცვლა სხვა მისამართებსაც ცვლის — წარმატების შემდეგ სია თავიდან ჩამოტვირთე.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: "#/components/schemas/AddressInput" }
+                - { type: object, required: [fullName, phone, city, address] }
+      responses:
+        "201":
+          description: შეიქმნა
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { $ref: "#/components/schemas/Address" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: ლიმიტი ამოწურულია (`ADDRESS_LIMIT_REACHED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+
+  /addresses/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    patch:
+      tags: [Addresses]
+      summary: მისამართის რედაქტირება
+      description: |
+        🔒 გაგზავნე მხოლოდ შესაცვლელი ველები. `isDefault: true` → ეს ხდება ნაგულისხმევი.
+
+        `isDefault: false` ნაგულისხმევზე → `422` — ნაგულისხმევი ყოველთვის უნდა არსებობდეს;
+        სანაცვლოდ სხვა მისამართს მიანიჭე `isDefault: true`.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddressInput" }
+      responses:
+        "200":
+          description: განახლდა
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { $ref: "#/components/schemas/Address" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: მისამართი არ მოიძებნა (`ADDRESS_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/Validation"
+    delete:
+      tags: [Addresses]
+      summary: მისამართის წაშლა
+      description: |
+        🔒 ნაგულისხმევის წაშლისას ნაგულისხმევი ხდება **ყველაზე ძველი** დარჩენილი მისამართი.
+        შეკვეთებს მისამართის წაშლა არ ეხება — შეკვეთა მისამართის ასლს ინახავს.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "204": { description: წაიშალა }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: მისამართი არ მოიძებნა (`ADDRESS_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
   /cart:
     get:
       tags: [Cart]
@@ -815,8 +919,11 @@ paths:
         🔒 **ჩექაუთის გვერდი ავტორიზაციის გარეშე არ იხსნება** — `401`-ზე გადაამისამართე `/login`-ზე
         და შესვლის შემდეგ დააბრუნე ჩექაუთზე.
 
-        აბრუნებს კალათას, ჯამებს მიწოდების ჩათვლით და `shipping`-ს — პროფილიდან
-        წინასწარ შევსებულ მისამართს ფორმისთვის. ცარიელ კალათაზე `items: []`.
+        აბრუნებს კალათას, ჯამებს მიწოდების ჩათვლით, `shipping`-ს — **ნაგულისხმევი
+        მისამართით** შევსებულ ფორმას (მისამართი თუ არ აქვს — მხოლოდ სახელი) და
+        `addresses`-ს — შენახულ მისამართებს ასარჩევად. ცარიელ კალათაზე `items: []`.
+
+        მისამართის არჩევისას ფორმა ფრონტზე ივსება — `POST /orders` ისევ სრულ `shipping`-ს იღებს.
       security: [{ bearerAuth: [] }]
       responses:
         "200":
@@ -885,7 +992,7 @@ paths:
         "422":
           $ref: "#/components/responses/Validation"
     get:
-      tags: [Checkout]
+      tags: [Orders]
       summary: ჩემი შეკვეთები
       description: 🔒 შეკვეთების ისტორია, ახალი პირველი.
       security: [{ bearerAuth: [] }]
@@ -986,7 +1093,7 @@ paths:
     parameters:
       - { name: id, in: path, required: true, schema: { type: string } }
     get:
-      tags: [Checkout]
+      tags: [Orders]
       summary: ერთი შეკვეთა
       description: 🔒 მხოლოდ საკუთარი — სხვისი შეკვეთის id-ზე `404`. შეკვეთის დადასტურების გვერდისთვის.
       security: [{ bearerAuth: [] }]
@@ -1053,10 +1160,29 @@ components:
         id: { type: string, example: "clx8f2k9a0000..." }
         name: { type: string, example: "Nino Beridze" }
         email: { type: string, example: "nino@example.com" }
-        phone: { type: string, nullable: true, example: "+995 555 12 34 56" }
-        city: { type: string, nullable: true, example: "Tbilisi" }
-        address: { type: string, nullable: true, example: "Rustaveli Ave 12, apt 5" }
         createdAt: { type: string, format: date-time }
+
+    Address:
+      type: object
+      properties:
+        id: { type: string }
+        label: { type: string, nullable: true, example: "სახლი" }
+        fullName: { type: string, example: "Nino Beridze", description: "მიმღები" }
+        phone: { type: string, example: "+995 555 12 34 56" }
+        city: { type: string, example: "Tbilisi" }
+        address: { type: string, example: "Rustaveli Ave 12, apt 5" }
+        isDefault: { type: boolean, example: true }
+        createdAt: { type: string, format: date-time }
+
+    AddressInput:
+      type: object
+      properties:
+        label: { type: string, nullable: true, maxLength: 30, example: "სახლი", description: "არასავალდებულო; `\"\"` ან `null` ასუფთავებს" }
+        fullName: { type: string, minLength: 2, example: "Nino Beridze" }
+        phone: { type: string, example: "+995 555 12 34 56" }
+        city: { type: string, minLength: 2, example: "Tbilisi" }
+        address: { type: string, minLength: 5, example: "Rustaveli Ave 12, apt 5" }
+        isDefault: { type: boolean, example: true }
 
     CartItem:
       type: object
@@ -1107,6 +1233,7 @@ components:
         currency: { type: string, example: GEL }
         freeShippingFrom: { type: number, example: 100 }
         shipping: { $ref: "#/components/schemas/Shipping" }
+        addresses: { type: array, items: { $ref: "#/components/schemas/Address" } }
 
     Order:
       type: object

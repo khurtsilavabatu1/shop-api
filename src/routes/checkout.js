@@ -6,6 +6,8 @@ import { validate, requireAuth } from '../middleware.js'
 import { loadCart, totals, money, FREE_SHIPPING_FROM } from '../lib/cart.js'
 import { digitsOnly, luhnValid, cardBrand, expiryValid, DECLINED_CARD } from '../lib/card.js'
 import { sendPaymentCode } from '../lib/mailer.js'
+import { shippingSchema } from '../lib/address.js'
+import { listAddresses } from './addresses.js'
 
 const router = Router()
 
@@ -14,13 +16,6 @@ const CODE_TTL_MINUTES = 10
 const RESEND_COOLDOWN_SECONDS = 30
 
 const required = (label) => z.string({ required_error: `${label} is required` }).trim().min(1, `${label} is required`)
-
-const shippingSchema = z.object({
-  fullName: required('Full name').pipe(z.string().min(2, 'Full name must be at least 2 characters')),
-  phone: required('Phone').pipe(z.string().regex(/^\+?[\d\s-]{9,20}$/, 'Enter a valid phone number')),
-  city: required('City'),
-  address: required('Address').pipe(z.string().min(5, 'Address must be at least 5 characters')),
-})
 
 const cardSchema = z.object({
   number: required('Card number').transform(digitsOnly)
@@ -82,19 +77,27 @@ const findOwnOrder = (req) => prisma.order.findFirst({
 
 const orderNotFound = (res) => res.status(404).json({ message: 'Order not found', code: 'ORDER_NOT_FOUND' })
 
-/* GET /api/checkout — ჩექაუთის გვერდის მონაცემები: კალათა, ჯამები, პროფილიდან შევსებული მისამართი */
+/* GET /api/checkout — ჩექაუთის გვერდის მონაცემები: კალათა, ჯამები, შენახული მისამართები */
 router.get('/checkout', requireAuth, async (req, res, next) => {
   try {
-    const [cart, user] = await Promise.all([
+    const [cart, user, addresses] = await Promise.all([
       loadCart(req.userId),
       prisma.user.findUnique({ where: { id: req.userId } }),
+      listAddresses(req.userId),
     ])
+    // ფორმა ნაგულისხმევი მისამართით ივსება; მისამართი თუ არ აქვს — მხოლოდ სახელით
+    const def = addresses.find((a) => a.isDefault)
     res.json({
       items: cart.items,
       totalQty: cart.totalQty,
       ...totals(cart.subtotal),
       freeShippingFrom: FREE_SHIPPING_FROM,
-      shipping: { fullName: user.name, phone: user.phone ?? '', city: user.city ?? '', address: user.address ?? '' },
+      shipping: def
+        ? { fullName: def.fullName, phone: def.phone, city: def.city, address: def.address }
+        : { fullName: user.name, phone: '', city: '', address: '' },
+      addresses: addresses.map((a) => ({
+        id: a.id, label: a.label, fullName: a.fullName, phone: a.phone, city: a.city, address: a.address, isDefault: a.isDefault,
+      })),
     })
   } catch (e) { next(e) }
 })

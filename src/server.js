@@ -8,10 +8,12 @@ import authRouter from './routes/auth.js'
 import catalogRouter from './routes/catalog.js'
 import cartRouter from './routes/cart.js'
 import checkoutRouter from './routes/checkout.js'
+import addressesRouter from './routes/addresses.js'
 import { latency } from './middleware.js'
 import { mailMode } from './lib/mailer.js'
 import { prisma } from './db.js'
 import { ensureCatalog } from '../prisma/seed/index.js'
+import { migrateLegacyAddresses } from './lib/legacy-addresses.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -38,6 +40,7 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok', time: new Date().
 app.use('/api/auth', authRouter)
 app.use('/api', catalogRouter)
 app.use('/api/cart', cartRouter)
+app.use('/api/addresses', addressesRouter)
 app.use('/api', checkoutRouter)
 
 app.get('/', (_req, res) => res.redirect('/docs'))
@@ -50,6 +53,7 @@ app.use((err, _req, res, _next) => {
 })
 
 ensureCatalog(prisma).catch((e) => console.error('კატალოგის შევსება ჩავარდა:', e.message))
+migrateLegacyAddresses(prisma).catch((e) => console.error('მისამართების მიგრაცია ჩავარდა:', e.message))
 
 app.listen(PORT, () => {
   console.log(`Cyber API  →  http://localhost:${PORT}/api`)

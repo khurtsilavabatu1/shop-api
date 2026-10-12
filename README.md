@@ -75,7 +75,11 @@ npm run seed
 | `POST` | `/api/auth/register` | რეგისტრაცია → `{ user, accessToken }` |
 | `POST` | `/api/auth/login` | შესვლა → `{ user, accessToken }` |
 | `GET` | `/api/auth/me` | მიმდინარე მომხმარებელი (Bearer) |
-| `PATCH` | `/api/auth/me` | 🔒 პროფილის რედაქტირება — სახელი, ელფოსტა, პაროლი, ტელეფონი, მისამართი (`currentPassword` სავალდებულოა) |
+| `PATCH` | `/api/auth/me` | 🔒 პროფილის რედაქტირება — სახელი, ელფოსტა, პაროლი (`currentPassword` სავალდებულოა) |
+| `GET` | `/api/addresses` | 🔒 მიწოდების მისამართები (ნაგულისხმევი პირველი) |
+| `POST` | `/api/addresses` | 🔒 მისამართის დამატება (მაქს. 10; პირველი — ნაგულისხმევი) |
+| `PATCH` | `/api/addresses/:id` | 🔒 რედაქტირება; `isDefault: true` — ნაგულისხმევად ქცევა |
+| `DELETE` | `/api/addresses/:id` | 🔒 წაშლა (ნაგულისხმევის ადგილს უძველესი იკავებს) |
 | `POST` | `/api/auth/logout` | გასვლა (204) |
 | `POST` | `/api/auth/forgot-password` | აღდგენა 1: კოდის მოთხოვნა |
 | `POST` | `/api/auth/verify-reset-code` | აღდგენა 2: კოდის შემოწმება → `{ resetToken }` |
@@ -85,7 +89,7 @@ npm run seed
 | `PATCH` | `/api/cart/items/:id` | 🔒 რაოდენობის შეცვლა `{ qty }` |
 | `DELETE` | `/api/cart/items/:id` | 🔒 პოზიციის წაშლა |
 | `DELETE` | `/api/cart` | 🔒 კალათის გასუფთავება |
-| `GET` | `/api/checkout` | 🔒 ჩექაუთის გვერდი: კალათა, მიწოდება, ჯამი, პროფილიდან შევსებული მისამართი |
+| `GET` | `/api/checkout` | 🔒 ჩექაუთის გვერდი: კალათა, მიწოდება, ჯამი, ნაგულისხმევი მისამართი + მისამართების სია |
 | `POST` | `/api/orders` | 🔒 გადახდა 1: `{ shipping, card }` → შეკვეთა + კოდი ელფოსტაზე |
 | `POST` | `/api/orders/:id/confirm` | 🔒 გადახდა 2: `{ code }` → გადახდილია, კალათა სუფთავდება |
 | `POST` | `/api/orders/:id/resend-code` | 🔒 კოდის ხელახლა გაგზავნა (30 წამში ერთხელ) |
@@ -122,7 +126,7 @@ Authorization: Bearer <accessToken>
 ## ჩექაუთი და ვითომ გადახდა
 
 ```
-1. GET  /checkout                       → კალათა, ჯამები, მისამართი პროფილიდან
+1. GET  /checkout                       → კალათა, ჯამები, ნაგულისხმევი მისამართი, addresses[]
 2. POST /orders  { shipping, card }     → { orderId, devCode? }  + კოდი ელფოსტაზე
 3. POST /orders/:id/confirm  { code }   → { order }  — მარაგი ჩამოიჭრება, კალათა სუფთავდება
 ```

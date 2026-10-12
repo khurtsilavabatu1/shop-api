@@ -48,16 +48,8 @@ const publicUser = (u) => ({
   id: u.id,
   name: u.name,
   email: u.email,
-  phone: u.phone ?? null,
-  city: u.city ?? null,
-  address: u.address ?? null,
   createdAt: u.createdAt,
 })
-
-/** არასავალდებულო ტექსტური ველი: "" ან null ასუფთავებს მნიშვნელობას */
-const optionalText = (schema) => z.union([schema, z.literal(''), z.null()])
-  .optional()
-  .transform((v) => (v === '' ? null : v))
 
 // ნებისმიერი ცვლილება მიმდინარე პაროლს მოითხოვს — ღია სესიიდან სხვამ ელფოსტა/პაროლი რომ ვერ შეცვალოს
 const updateProfileSchema = z.object({
@@ -65,11 +57,8 @@ const updateProfileSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').optional(),
   email: email.optional(),
   newPassword: strongPassword.optional(),
-  phone: optionalText(z.string().trim().regex(/^\+?[\d\s-]{9,20}$/, 'Enter a valid phone number')),
-  city: optionalText(z.string().trim().min(2, 'City must be at least 2 characters')),
-  address: optionalText(z.string().trim().min(5, 'Address must be at least 5 characters')),
 }).refine(
-  (b) => ['name', 'email', 'newPassword', 'phone', 'city', 'address'].some((k) => b[k] !== undefined),
+  (b) => ['name', 'email', 'newPassword'].some((k) => b[k] !== undefined),
   { message: 'Provide at least one field to update', path: ['_'] },
 )
 
@@ -121,7 +110,7 @@ router.get('/me', requireAuth, async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-/* PATCH /api/auth/me — პროფილის რედაქტირება: სახელი, ელფოსტა, პაროლი, საკონტაქტო მონაცემები */
+/* PATCH /api/auth/me — პროფილის რედაქტირება: სახელი, ელფოსტა, პაროლი. მისამართები — /api/addresses */
 router.patch('/me', requireAuth, validate(updateProfileSchema), async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.userId } })
