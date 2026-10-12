@@ -12,11 +12,6 @@ model User {
   name         String
   email        String              @unique
   passwordHash String
-  // ⚠️ მოძველებული — მისამართები Address-შია. სერვერის ჩართვისას გადაიტანება და ცარიელდება;
-  // შემდეგ deploy-ზე სვეტები წაიშლება (ცარიელი სვეტის წაშლა db push-ს არ აჩერებს)
-  phone        String?
-  city         String?
-  address      String?
   createdAt    DateTime            @default(now())
   resetCodes   PasswordResetCode[]
   cartItems    CartItem[]

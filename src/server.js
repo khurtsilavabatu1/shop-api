@@ -13,7 +13,6 @@ import { latency } from './middleware.js'
 import { mailMode } from './lib/mailer.js'
 import { prisma } from './db.js'
 import { ensureCatalog } from '../prisma/seed/index.js'
-import { migrateLegacyAddresses } from './lib/legacy-addresses.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -53,7 +52,6 @@ app.use((err, _req, res, _next) => {
 })
 
 ensureCatalog(prisma).catch((e) => console.error('კატალოგის შევსება ჩავარდა:', e.message))
-migrateLegacyAddresses(prisma).catch((e) => console.error('მისამართების მიგრაცია ჩავარდა:', e.message))
 
 app.listen(PORT, () => {
   console.log(`Cyber API  →  http://localhost:${PORT}/api`)
